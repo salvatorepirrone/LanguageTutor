@@ -143,7 +143,7 @@ export async function run({ iterations = 1000 } = {}) {
   // ---------------- sessione
   r = await call('GET', API, { cookie: jar.salvatore });
   ok(r.status === 200 && r.json.needsPlacement === true && r.json.profile.level === 'B1-' && r.json.plan.length === 8, 'stato iniziale: serve il test di ingresso', JSON.stringify(r.json).slice(0, 200));
-  ok(r.json.me.user === 'salvatore' && r.json.me.role === 'admin' && r.json.grammar.length === 7 && r.json.themes.length === 16, 'stato: utente, grammatica, temi');
+  ok(r.json.me.user === 'salvatore' && r.json.me.role === 'admin' && r.json.grammar.length === 8 && r.json.themes.length === 16, 'stato: utente, grammatica, temi');
   const tampered = jar.salvatore.replace(/\.[^.;]+/, '.firmafalsa');
   r = await call('GET', API, { cookie: tampered });
   ok(r.status === 401, 'cookie manomesso: 401');
@@ -198,7 +198,7 @@ export async function run({ iterations = 1000 } = {}) {
 
   // ---------------- azioni del tutor (come admin)
   const S = jar.salvatore2;
-  r = await call('POST', API, { cookie: S, body: { action: 'profile_set', level: 'C1' } });
+  r = await call('POST', API, { cookie: S, body: { action: 'profile_set', level: 'D9' } });
   ok(r.status === 400, 'livello non valido rifiutato');
   r = await call('POST', API, { cookie: S, body: { action: 'profile_set', level: 'A2', source: 'test' } });
   ok(r.status === 200 && r.json.plan[0].title === 'Presente regolare, articoli e contrazioni' && r.json.profile.level === 'A2', 'profilo A2: piano per il livello');

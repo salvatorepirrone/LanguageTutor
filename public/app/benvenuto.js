@@ -7,7 +7,9 @@
     { level: 'A2', title: 'Parto dalle basi', text: 'So presentarmi e fare frasi semplici, ma i passati e i pronomi mi mettono in difficoltà.' },
     { level: 'B1-', title: 'Appena sotto il B1', text: TUTOR.levelHints['B1-'] },
     { level: 'B1', title: 'B1', text: TUTOR.levelHints['B1'] },
-    { level: 'B1+', title: 'Più del B1', text: 'Parlo con una certa scioltezza; voglio puntare al B2.' }
+    { level: 'B1+', title: 'Più del B1', text: 'Parlo con una certa scioltezza; voglio puntare al B2.' },
+    { level: 'B2', title: 'Upper-intermediate (B2)', text: 'Parlo con scioltezza e discuto di molti argomenti; voglio puntare al C1.' },
+    { level: 'C1', title: 'Avanzato (C1)', text: 'Mi esprimo con precisione e naturalezza; voglio rifinire stile, registro e sfumature.' }
   ];
 
   function mount(root) {

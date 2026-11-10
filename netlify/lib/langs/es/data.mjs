@@ -268,6 +268,36 @@ export default {
      "title": "Discorso indiretto (dijo que..., me preguntó si...)"
     }
    ]
+  },
+  {
+   "id": "avanzato",
+   "title": "Avanzato (B2-C1)",
+   "topics": [
+    {
+     "id": "subj-imperfecto",
+     "title": "Imperfecto y pluscuamperfecto de subjuntivo (si tuviera, si hubiera tenido, ojalá, como si)"
+    },
+    {
+     "id": "subj-complesso",
+     "title": "Subjuntivo nelle subordinate complesse (aunque, por mucho que, cuando, relative)"
+    },
+    {
+     "id": "concordanza-tempi",
+     "title": "Concordanza dei tempi e discorso indiretto avanzato"
+    },
+    {
+     "id": "perifrasi-avanzate",
+     "title": "Gerundio, participio e infinito: costruzioni ridotte e perifrasi avanzate"
+    },
+    {
+     "id": "connettori-formali",
+     "title": "Connettori e registro formale (no obstante, a pesar de que, de modo que, por consiguiente)"
+    },
+    {
+     "id": "registro-idiomi",
+     "title": "Registro, modismos e collocazioni (espressioni idiomatiche, falsi amici)"
+    }
+   ]
   }
  ],
  "vocabThemes": [
@@ -669,72 +699,151 @@ export default {
   ],
   "B2": [
    {
-    "title": "Subjuntivo avanzato",
-    "focus": "subjuntivo con cuando, aunque, para que, relative e espressioni di dubbio; contrasto indicativo/subjuntivo",
+    "title": "Imperfecto y pluscuamperfecto de subjuntivo",
+    "focus": "ipotesi irreali nel presente e nel passato (si tuviera, si hubiera tenido), ojalá, como si",
     "topics": [
+     "subj-imperfecto",
+     "ipotetiche",
+     "condicional"
+    ]
+   },
+   {
+    "title": "Subjuntivo complesso",
+    "focus": "subjuntivo nelle subordinate: aunque, por mucho que, cuando, relative; indicativo contro subjuntivo",
+    "topics": [
+     "subj-complesso",
      "subj-usi",
-     "subj-presente"
-    ]
-   },
-   {
-    "title": "Condizionale e ipotesi",
-    "focus": "condizionale, periodo ipotetico (si + imperfecto de subjuntivo), consigli e desideri irreali",
-    "topics": [
-     "condicional",
-     "ipotetiche"
-    ]
-   },
-   {
-    "title": "Discorso indiretto",
-    "focus": "riportare dichiarazioni e domande, concordanza dei tempi, pluscuamperfecto",
-    "topics": [
-     "stile-indiretto",
-     "pluscuamperfecto"
-    ]
-   },
-   {
-    "title": "Argomentare",
-    "focus": "connettori, relative, strutturare un discorso con tesi, esempi e conclusioni",
-    "topics": [
-     "connettori",
      "relative"
     ]
    },
    {
-    "title": "Cambio, perifrasi, impersonali",
-    "focus": "verbi di cambiamento, perifrasi, forme impersonali e passive",
+    "title": "Discorso indiretto e concordanza dei tempi",
+    "focus": "riportare dichiarazioni, domande e ordini; concordanza dei tempi anche nel passato",
     "topics": [
-     "cambio",
-     "perifrasi",
-     "impersonali"
+     "stile-indiretto",
+     "concordanza-tempi",
+     "pluscuamperfecto"
     ]
    },
    {
-    "title": "Sfumature",
-    "focus": "por/para, a personal, saber/conocer, pedir/preguntar e altre coppie che confondono",
+    "title": "Passivo, impersonali e perifrasi",
+    "focus": "pasiva, se impersonale, perifrasi verbali, gerundio e participio avanzati",
+    "topics": [
+     "impersonali",
+     "perifrasi-avanzate",
+     "gerundio"
+    ]
+   },
+   {
+    "title": "Connettori e registro formale",
+    "focus": "no obstante, a pesar de que, de modo que, por consiguiente; email e testi formali",
+    "topics": [
+     "connettori-formali",
+     "connettori",
+     "registro-idiomi"
+    ]
+   },
+   {
+    "title": "Sfumature lessicali e preposizioni",
+    "focus": "por/para, a personal, verbi con preposizione, coppie che confondono",
     "topics": [
      "por-para",
      "a-personal",
+     "pedir-preguntar",
      "saber-conocer",
-     "pedir-preguntar"
+     "cambio"
     ]
    },
    {
-    "title": "Avverbi, quantificatori, confronti",
-    "focus": "avverbi in -mente, quantificatori, comparativi e superlativi, lessico meno comune",
+    "title": "Registro, modismos e collocazioni",
+    "focus": "espressioni idiomatiche, registro formale e informale, collocazioni, falsi amici",
     "topics": [
-     "avv-mente",
+     "registro-idiomi",
      "quantificatori",
      "comparativi"
     ]
    },
    {
-    "title": "Simulazione finale",
-    "focus": "conversazione libera di 15 minuti su temi di attualità, con opinioni argomentate, come in un esame B2 iniziale",
+    "title": "Simulazione verso il C1",
+    "focus": "discussione di 15-20 minuti su temi complessi, argomentando con subordinate e connettori",
     "topics": [
-     "subj-usi",
+     "subj-complesso",
      "ipotetiche",
-     "connettori"
+     "connettori-formali"
+    ]
+   }
+  ],
+  "C1": [
+   {
+    "title": "Padronanza del subjuntivo",
+    "focus": "tutti i tempi del subjuntivo, concordanza e alternanza indicativo/subjuntivo nelle sfumature",
+    "topics": [
+     "subj-imperfecto",
+     "subj-complesso",
+     "concordanza-tempi"
+    ]
+   },
+   {
+    "title": "Stile e struttura del discorso",
+    "focus": "testi argomentativi, connettori formali, riformulare e sintetizzare",
+    "topics": [
+     "connettori-formali",
+     "relative",
+     "stile-indiretto"
+    ]
+   },
+   {
+    "title": "Forme non personali e perifrasi",
+    "focus": "participio, gerundio e infinito: costruzioni ridotte e perifrasi avanzate",
+    "topics": [
+     "perifrasi-avanzate",
+     "gerundio",
+     "participio"
+    ]
+   },
+   {
+    "title": "Passivo e impersonali avanzati",
+    "focus": "pasiva refleja, impersonali, strutture enfatiche e frasi scisse",
+    "topics": [
+     "impersonali",
+     "ser-estar",
+     "cambio"
+    ]
+   },
+   {
+    "title": "Registro e idiomi",
+    "focus": "registri, modismos, proverbi, collocazioni e ironia",
+    "topics": [
+     "registro-idiomi",
+     "quantificatori"
+    ]
+   },
+   {
+    "title": "Sfumature di significato",
+    "focus": "por/para, coppie sinonimiche, falsi amici e verbi che cambiano significato",
+    "topics": [
+     "por-para",
+     "pedir-preguntar",
+     "saber-conocer",
+     "a-personal"
+    ]
+   },
+   {
+    "title": "Argomentazione e dibattito",
+    "focus": "sostenere e controbattere, ipotesi, concessioni, condizionali complessi",
+    "topics": [
+     "ipotetiche",
+     "condicional",
+     "connettori-formali"
+    ]
+   },
+   {
+    "title": "Simulazione C1",
+    "focus": "presentazione o colloquio di 20 minuti su un tema astratto, con registro adeguato",
+    "topics": [
+     "subj-complesso",
+     "registro-idiomi",
+     "concordanza-tempi"
     ]
    }
   ]
@@ -898,20 +1007,23 @@ export default {
   "B1-": "livello appena sotto il B1: si fa capire ma sbaglia spesso con i tempi del passato, ser/estar, pronomi e subjuntivo",
   "B1": "livello B1: se la cava nelle situazioni comuni; gli errori tipici sono subjuntivo, pronomi doppi, preposizioni e tempi del passato nelle frasi lunghe",
   "B1+": "livello B1+ (quasi B2): parla con una certa scioltezza; va spinto su subjuntivo, periodo ipotetico, connettori, registro e lessico meno comune",
-  "B2": "livello B2: parla con scioltezza; va spinto su sfumature, espressioni idiomatiche, registro formale e informale e strutture complesse"
+  "B2": "livello B2 (upper-intermediate): parla con scioltezza e si fa capire su molti argomenti; va spinto verso il C1: subjuntivo in tutti i tempi, subordinate complesse, registro formale e informale, modismos e sfumature",
+  "C1": "livello C1 (avanzato): si esprime con precisione e naturalezza; va spinto sulle sfumature, sul registro, sulle espressioni idiomatiche, sulla coesione del discorso e sugli usi più sottili di subjuntivo, perifrasi e connettori"
  },
  "levelLabel": {
   "A2": "A2",
   "B1-": "appena sotto il B1",
   "B1": "B1",
   "B1+": "B1+",
-  "B2": "B2"
+  "B2": "B2 (upper-intermediate)",
+  "C1": "C1 (avanzato)"
  },
  "levels": [
   "A2",
   "B1-",
   "B1",
   "B1+",
-  "B2"
+  "B2",
+  "C1"
  ]
 };

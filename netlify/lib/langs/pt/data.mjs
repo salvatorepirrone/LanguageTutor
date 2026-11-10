@@ -276,6 +276,36 @@ export default {
      "title": "Discorso indiretto (disse que..., perguntou se...)"
     }
    ]
+  },
+  {
+   "id": "avanzato",
+   "title": "Avanzato (B2-C1)",
+   "topics": [
+    {
+     "id": "subj-complesso",
+     "title": "Subjuntivo nelle subordinate complesse (embora, por mais que, quando, se, relative)"
+    },
+    {
+     "id": "concordanza-tempi",
+     "title": "Concordanza dei tempi e discorso indiretto avanzato"
+    },
+    {
+     "id": "perifrasi-avanzate",
+     "title": "Gerúndio, particípio e infinito: costruzioni ridotte e perifrasi avanzate"
+    },
+    {
+     "id": "connettori-formali",
+     "title": "Conectivos e registro formale (contudo, no entanto, portanto, a fim de que)"
+    },
+    {
+     "id": "colocazione-avanzata",
+     "title": "Colocação pronominal avanzata (próclise, ênclise, mesóclise) e registro scritto"
+    },
+    {
+     "id": "registro-idiomi",
+     "title": "Registro, espressioni idiomatiche e brasilianismi (collocazioni, falsi amici)"
+    }
+   ]
   }
  ],
  "vocabThemes": [
@@ -678,74 +708,151 @@ export default {
   ],
   "B2": [
    {
-    "title": "Subjuntivo avanzato",
-    "focus": "subjuntivo con quando/se (futuro do subjuntivo), embora, para que, relative e espressioni di dubbio",
+    "title": "Imperfeito do subjuntivo e ipotesi irreali",
+    "focus": "se eu tivesse / se eu tivesse feito, tomara que, como se; ipotesi sul presente e sul passato",
     "topics": [
-     "subj-usi",
-     "subj-presente",
-     "subj-futuro"
-    ]
-   },
-   {
-    "title": "Condizionale e ipotesi",
-    "focus": "futuro do pretérito, periodo ipotetico (se + imperfeito do subjuntivo), consigli e desideri irreali",
-    "topics": [
-     "condicional",
+     "subj-imperfeito",
      "ipotetiche",
-     "subj-imperfeito"
+     "condicional"
     ]
    },
    {
-    "title": "Discorso indiretto",
-    "focus": "riportare dichiarazioni e domande, concordanza dei tempi, mais-que-perfeito",
+    "title": "Futuro do subjuntivo e subordinate complesse",
+    "focus": "quando, se, assim que, embora, para que, relative con subjuntivo",
+    "topics": [
+     "subj-futuro",
+     "subj-complesso",
+     "subj-usi"
+    ]
+   },
+   {
+    "title": "Discorso indiretto e concordanza dei tempi",
+    "focus": "riportare dichiarazioni, domande e ordini; concordanza dei tempi anche nel passato",
     "topics": [
      "stile-indiretto",
+     "concordanza-tempi",
      "mais-que-perfeito"
     ]
    },
    {
-    "title": "Argomentare",
-    "focus": "connettori, relative, strutturare un discorso con tesi, esempi e conclusioni",
-    "topics": [
-     "connettori",
-     "relative"
-    ]
-   },
-   {
-    "title": "Infinito pessoale, impersonali, ficar",
-    "focus": "infinitivo pessoal, forme impersonali e passive, verbi di cambiamento",
+    "title": "Infinito pessoale, impersonali e perifrasi",
+    "focus": "infinitivo pessoal, forme impersonali e passive, perifrasi, gerúndio e particípio",
     "topics": [
      "infinitivo-pessoal",
      "impessoais",
-     "ficar"
+     "perifrasi-avanzate"
     ]
    },
    {
-    "title": "Sfumature",
-    "focus": "por/para, saber/conhecer, pedir/perguntar, verbi con preposizione e altre coppie che confondono",
+    "title": "Conectivos e registro formale",
+    "focus": "embora, contudo, no entanto, portanto; email e testi formali",
     "topics": [
-     "por-para",
+     "connettori-formali",
+     "connettori",
+     "registro-idiomi"
+    ]
+   },
+   {
+    "title": "Colocação pronominal e sfumature",
+    "focus": "próclise e ênclise nello scritto formale, verbi con preposizione, coppie che confondono",
+    "topics": [
+     "colocazione-avanzata",
+     "reggenza",
      "saber-conhecer",
      "pedir-perguntar",
-     "reggenza"
+     "por-para"
     ]
    },
    {
-    "title": "Avverbi, quantificatori, confronti",
-    "focus": "avverbi in -mente, quantificatori, comparativi e superlativi, lessico meno comune",
+    "title": "Registro, espressioni idiomatiche e brasilianismi",
+    "focus": "registro formale e informale, collocazioni, modi di dire, falsi amici",
     "topics": [
-     "avv-mente",
+     "registro-idiomi",
      "quantificatori",
      "comparativi"
     ]
    },
    {
-    "title": "Simulazione finale",
-    "focus": "conversazione libera di 15 minuti su temi di attualità, con opinioni argomentate, come in un esame B2 iniziale",
+    "title": "Simulazione verso il C1",
+    "focus": "discussione di 15-20 minuti su temi complessi, argomentando con subordinate e connettori",
     "topics": [
-     "subj-usi",
+     "subj-complesso",
      "ipotetiche",
-     "connettori"
+     "connettori-formali"
+    ]
+   }
+  ],
+  "C1": [
+   {
+    "title": "Padronanza del subjuntivo",
+    "focus": "tutti i tempi del subjuntivo, concordanza e alternanza indicativo/subjuntivo nelle sfumature",
+    "topics": [
+     "subj-imperfeito",
+     "subj-futuro",
+     "subj-complesso"
+    ]
+   },
+   {
+    "title": "Stile e struttura del discorso",
+    "focus": "testi argomentativi, conectivos formali, riformulare e sintetizzare",
+    "topics": [
+     "connettori-formali",
+     "relative",
+     "stile-indiretto"
+    ]
+   },
+   {
+    "title": "Forme non personali",
+    "focus": "infinito pessoal, gerúndio e particípio: costruzioni ridotte e perifrasi avanzate",
+    "topics": [
+     "infinitivo-pessoal",
+     "perifrasi-avanzate",
+     "gerundio"
+    ]
+   },
+   {
+    "title": "Colocação e registro scritto",
+    "focus": "próclise, ênclise e mesóclise; scritto formale e letterario contro parlato",
+    "topics": [
+     "colocazione-avanzata",
+     "registro-idiomi",
+     "pron-colocazione"
+    ]
+   },
+   {
+    "title": "Registro e idiomi",
+    "focus": "registri, espressioni idiomatiche, proverbi, collocazioni e ironia",
+    "topics": [
+     "registro-idiomi",
+     "quantificatori"
+    ]
+   },
+   {
+    "title": "Sfumature di significato",
+    "focus": "por/para, ficar e verbi di cambiamento, coppie sinonimiche e falsi amici",
+    "topics": [
+     "por-para",
+     "ficar",
+     "pedir-perguntar",
+     "saber-conhecer"
+    ]
+   },
+   {
+    "title": "Argomentazione e dibattito",
+    "focus": "sostenere e controbattere, ipotesi, concessioni, condizionali complessi",
+    "topics": [
+     "ipotetiche",
+     "condicional",
+     "connettori-formali"
+    ]
+   },
+   {
+    "title": "Simulazione C1",
+    "focus": "presentazione o colloquio di 20 minuti su un tema astratto, con registro adeguato",
+    "topics": [
+     "subj-complesso",
+     "registro-idiomi",
+     "concordanza-tempi"
     ]
    }
   ]
@@ -909,20 +1016,23 @@ export default {
   "B1-": "livello appena sotto il B1: si fa capire ma sbaglia spesso con i tempi del passato, ser/estar, pronomi (anche la loro posizione) e subjuntivo",
   "B1": "livello B1: se la cava nelle situazioni comuni; gli errori tipici sono subjuntivo (compreso il futuro do subjuntivo), colocação dei pronomi, preposizioni e tempi del passato nelle frasi lunghe",
   "B1+": "livello B1+ (quasi B2): parla con una certa scioltezza; va spinto su subjuntivo, periodo ipotetico, infinito pessoale, connettori, registro e lessico meno comune",
-  "B2": "livello B2: parla con scioltezza; va spinto su sfumature, espressioni idiomatiche, registro formale e informale e strutture complesse"
+  "B2": "livello B2 (upper-intermediate): parla con scioltezza e si fa capire su molti argomenti; va spinto verso il C1: subjuntivo in tutti i tempi, subordinate complesse, infinito pessoale, registro formale e informale, espressioni idiomatiche e sfumature",
+  "C1": "livello C1 (avanzato): si esprime con precisione e naturalezza; va spinto sulle sfumature, sul registro, sulle espressioni idiomatiche, sulla coesione del discorso e sugli usi più sottili di subjuntivo, infinito pessoal e colocação pronominal"
  },
  "levelLabel": {
   "A2": "A2",
   "B1-": "appena sotto il B1",
   "B1": "B1",
   "B1+": "B1+",
-  "B2": "B2"
+  "B2": "B2 (upper-intermediate)",
+  "C1": "C1 (avanzato)"
  },
  "levels": [
   "A2",
   "B1-",
   "B1",
   "B1+",
-  "B2"
+  "B2",
+  "C1"
  ]
 };

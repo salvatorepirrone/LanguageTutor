@@ -115,4 +115,4 @@ Spagnolo 93 prove, portoghese 87, inglese 93. Dopo aver modificato un file, rica
 - Lezioni, liste di vocabolario ed esercizi sono generati da Claude e non sono riletti da un insegnante.
 - Il microfono richiede Chrome, Edge o Safari e una connessione a internet.
 - Il motore dei verbi inglese coniuga con regole e con circa 160 verbi irregolari; un verbo non in elenco viene verificato dal tutor.
-- I livelli vanno da A2 a B2 per tutte le lingue.
+- I livelli vanno da A2 a C1 per tutte le lingue (B2 è l'upper-intermediate, puntando al C1); gli argomenti avanzati stanno nella sezione «Avanzato (B2-C1)» della grammatica.

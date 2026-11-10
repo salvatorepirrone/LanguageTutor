@@ -3,17 +3,18 @@
   'use strict';
   var el = SP.el;
   var SECTION_LABEL = { tempi: 'Tempi verbali', forme: 'Pronomi, preposizioni e forme', lessico: 'Vocabolario', comprensione: 'Comprensione scritta' };
-  var WEIGHT = { A2: 1, B1: 2, B2: 3 };
+  var WEIGHT = { A2: 1, B1: 2, B2: 3, C1: 4 };
 
   function estimate(ratio) {
-    return ratio < 0.4 ? 'A2' : ratio < 0.6 ? 'B1-' : ratio < 0.8 ? 'B1' : ratio < 0.92 ? 'B1+' : 'B2';
+    return ratio < 0.33 ? 'A2' : ratio < 0.48 ? 'B1-' : ratio < 0.62 ? 'B1' : ratio < 0.74 ? 'B1+' : ratio < 0.88 ? 'B2' : 'C1';
   }
   var LEVEL_TEXT = {
     'A2': 'A2: base solida da consolidare',
     'B1-': 'appena sotto il B1: ci sei quasi',
     'B1': 'B1: livello raggiunto',
     'B1+': 'B1 pieno, con basi del B2',
-    'B2': 'B2: oltre l\'obiettivo'
+    'B2': 'B2: upper-intermediate, puntando al C1',
+    'C1': 'C1: livello avanzato'
   };
 
   var placement = false;   // true quando il test serve a stabilire il livello di partenza

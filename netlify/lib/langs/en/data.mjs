@@ -242,6 +242,36 @@ export default {
      "title": "Preposizioni dopo verbi, nomi e aggettivi (depend on, afraid of, interested in)"
     }
    ]
+  },
+  {
+   "id": "avanzato",
+   "title": "Avanzato (B2-C1)",
+   "topics": [
+    {
+     "id": "inversione",
+     "title": "Inversione ed enfasi (never have I…, not only… but also, it was… that)"
+    },
+    {
+     "id": "condizionali-avanzati",
+     "title": "Condizionali misti e alternative a if (unless, provided that, suppose, should/were to)"
+    },
+    {
+     "id": "passivo-avanzato",
+     "title": "Passivo avanzato e causativo (it is said that…, have/get something done)"
+    },
+    {
+     "id": "frasi-ridotte",
+     "title": "Frasi ridotte e participiali (having finished…, relative ridotte)"
+    },
+    {
+     "id": "modali-sfumature",
+     "title": "Modali di deduzione e sfumature (must/can't/might have, would e will di abitudine)"
+    },
+    {
+     "id": "registro-idiomi",
+     "title": "Registro, collocazioni e idiomi (formale e informale, phrasal verbs avanzati)"
+    }
+   ]
   }
  ],
  "vocabThemes": [
@@ -501,21 +531,24 @@ export default {
   "B1-",
   "B1",
   "B1+",
-  "B2"
+  "B2",
+  "C1"
  ],
  "levelLabel": {
   "A2": "A2",
   "B1-": "appena sotto il B1",
   "B1": "B1",
   "B1+": "B1+",
-  "B2": "B2"
+  "B2": "B2 (upper-intermediate)",
+  "C1": "C1 (avanzato)"
  },
  "levelText": {
   "A2": "livello A2 (base): conosce il present simple e frasi semplici, fatica con i passati, le preposizioni e l'ordine delle parole; usa frasi molto brevi e un lessico limitato",
   "B1-": "livello appena sotto il B1: si fa capire ma sbaglia spesso con past simple e present perfect, articoli, preposizioni e verbi irregolari",
   "B1": "livello B1: se la cava nelle situazioni comuni; gli errori tipici sono present perfect contro past simple, condizionali, preposizioni, phrasal verbs e tempi del passato nelle frasi lunghe",
   "B1+": "livello B1+ (quasi B2): parla con una certa scioltezza; va spinto su condizionali, passivo, discorso indiretto, connettori, registro e lessico meno comune",
-  "B2": "livello B2: parla con scioltezza; va spinto su sfumature, espressioni idiomatiche, registro formale e informale e strutture complesse"
+  "B2": "livello B2 (upper-intermediate): parla con scioltezza e si fa capire su molti argomenti; va spinto verso il C1: condizionali misti, inversione, passivo e causativo, frasi ridotte, registro formale e informale, idiomi e sfumature",
+  "C1": "livello C1 (avanzato): si esprime con precisione e naturalezza; va spinto sulle sfumature, sul registro, sulle collocazioni e sugli idiomi, sulla coesione del discorso e su strutture sofisticate come inversione, frasi ridotte e hedging"
  },
  "tracks": {
   "A2": [
@@ -812,71 +845,150 @@ export default {
   ],
   "B2": [
    {
-    "title": "Condizionali misti e wish",
-    "focus": "mixed conditionals, wish, if only, would rather",
+    "title": "Condizionali misti e alternative a if",
+    "focus": "mixed conditionals, unless, provided that, suppose, should/were to, wish e if only",
     "topics": [
+     "condizionali-avanzati",
      "ipotetiche",
      "wish"
     ]
    },
    {
-    "title": "Modali nel passato",
-    "focus": "must have, can't have, might have, should have: deduzioni e rimpianti",
+    "title": "Inversione ed enfasi",
+    "focus": "never have I…, not only… but also, frasi scisse (it was… that), enfasi",
     "topics": [
-     "modali-passato",
-     "modali"
+     "inversione",
+     "ordine-frase",
+     "connettori"
     ]
    },
    {
-    "title": "Passivo e forme causative",
-    "focus": "passivo con verbi di opinione, have/get something done",
+    "title": "Passivo avanzato e causativo",
+    "focus": "it is said that…, have/get something done, passivo con verbi di opinione",
     "topics": [
+     "passivo-avanzato",
      "passivo",
      "get"
     ]
    },
    {
-    "title": "Discorso indiretto avanzato",
-    "focus": "reporting verbs, domande indirette, concordanza dei tempi",
+    "title": "Frasi ridotte e participiali",
+    "focus": "having finished…, participi presenti e passati come frasi ridotte, relative ridotte",
     "topics": [
-     "stile-indiretto",
-     "domande"
+     "frasi-ridotte",
+     "relative",
+     "gerundio-infinito"
     ]
    },
    {
-    "title": "Argomentare",
-    "focus": "connettori, relative, strutturare un discorso con tesi, esempi e conclusioni",
+    "title": "Modali di deduzione e sfumature",
+    "focus": "must/can't/might have + participio, would e will di abitudine, modali nel passato",
+    "topics": [
+     "modali-sfumature",
+     "modali-passato",
+     "modali"
+    ]
+   },
+   {
+    "title": "Discorso indiretto e reporting verbs",
+    "focus": "riportare dichiarazioni, domande e ordini; reporting verbs; concordanza dei tempi",
+    "topics": [
+     "stile-indiretto",
+     "domande",
+     "connettori"
+    ]
+   },
+   {
+    "title": "Registro, collocazioni e idiomi",
+    "focus": "formale e informale, phrasal verbs avanzati, collocazioni, linking words",
+    "topics": [
+     "registro-idiomi",
+     "phrasal",
+     "make-do"
+    ]
+   },
+   {
+    "title": "Simulazione verso il C1",
+    "focus": "discussione di 15-20 minuti su temi complessi, argomentando con subordinate e connettori",
+    "topics": [
+     "condizionali-avanzati",
+     "inversione",
+     "connettori"
+    ]
+   }
+  ],
+  "C1": [
+   {
+    "title": "Strutture complesse e inversione",
+    "focus": "inversione, frasi ridotte, ordine marcato delle parole per dare enfasi",
+    "topics": [
+     "inversione",
+     "frasi-ridotte",
+     "ordine-frase"
+    ]
+   },
+   {
+    "title": "Condizionali e ipotesi sofisticate",
+    "focus": "condizionali misti, wish e if only, modali nel passato per rimpianti e deduzioni",
+    "topics": [
+     "condizionali-avanzati",
+     "wish",
+     "modali-passato"
+    ]
+   },
+   {
+    "title": "Passivo, causativo e impersonali",
+    "focus": "passivo con verbi di opinione, have/get something done, get passive",
+    "topics": [
+     "passivo-avanzato",
+     "passivo",
+     "get"
+    ]
+   },
+   {
+    "title": "Stile e coesione",
+    "focus": "linking, hedging (it would seem that…), riformulazione e nominalizzazione",
     "topics": [
      "connettori",
+     "registro-idiomi",
      "relative"
     ]
    },
    {
-    "title": "Phrasal verbs e collocazioni",
-    "focus": "phrasal verbs, preposizioni dipendenti, make/do/get e collocazioni",
+    "title": "Collocazioni e phrasal verbs",
+    "focus": "collocazioni, phrasal verbs e preposizioni dipendenti usati con naturalezza",
     "topics": [
      "phrasal",
-     "make-do",
+     "registro-idiomi",
      "prep-dipendenti"
     ]
    },
    {
-    "title": "Sfumature",
-    "focus": "articoli, quantificatori, avverbi di grado, comparativi e superlativi, lessico meno comune",
+    "title": "Sfumature di significato",
+    "focus": "modali, articoli, quantificatori, avverbi di grado e coppie di parole che confondono",
     "topics": [
+     "modali-sfumature",
      "articoli",
      "quantificatori",
-     "avverbi-freq",
-     "comparativi"
+     "avverbi-freq"
     ]
    },
    {
-    "title": "Simulazione finale",
-    "focus": "conversazione libera di 15 minuti su temi di attualità, con opinioni argomentate, come in un esame B2 iniziale",
+    "title": "Discorso e argomentazione",
+    "focus": "sostenere e controbattere, riportare, fare concessioni e trarre conclusioni",
     "topics": [
-     "ipotetiche",
+     "stile-indiretto",
      "connettori",
-     "modali-passato"
+     "domande"
+    ]
+   },
+   {
+    "title": "Simulazione C1",
+    "focus": "presentazione o colloquio di 20 minuti su un tema astratto, con registro adeguato",
+    "topics": [
+     "condizionali-avanzati",
+     "inversione",
+     "registro-idiomi"
     ]
    }
   ]

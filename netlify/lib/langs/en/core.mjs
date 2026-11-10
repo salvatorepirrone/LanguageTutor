@@ -8,7 +8,7 @@ export const CFG = {
   MAX_MESSAGES: 24,
   MAX_CHARS: 800,
   SRS_DAYS: [1, 3, 7, 16, 35],
-  BASE_RULES: 'Sei un insegnante di inglese (variante britannica) per studenti italiani adulti di livello A2-B2. Spiegazioni e consegne in italiano; frasi di esempio e contenuti da imparare in inglese britannico (lessico e ortografia del Regno Unito), naturali e corretti. Rispondi SOLO con un oggetto JSON valido, senza testo prima o dopo e senza blocchi di codice.',
+  BASE_RULES: 'Sei un insegnante di inglese (variante britannica) per studenti italiani adulti di livello da A2 a C1. Spiegazioni e consegne in italiano; frasi di esempio e contenuti da imparare in inglese britannico (lessico e ortografia del Regno Unito), naturali e corretti. Rispondi SOLO con un oggetto JSON valido, senza testo prima o dopo e senza blocchi di codice.',
 };
 export const LEVELS = DATA.levels;
 export { DATA };

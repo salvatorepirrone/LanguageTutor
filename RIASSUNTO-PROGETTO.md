@@ -47,7 +47,7 @@ e non si sviluppano più. Anche il repository vuoto `speakenglish` non è usato 
 ## Limiti noti (da dire onestamente)
 
 - Il vero Claude non è stato provato in locale: non so quanto siano naturali le traduzioni italiane delle forme verbali, i punteggi parziali, i controlli dei verbi e l'inglese generato.
-- I livelli vanno da A2 a B2 per tutte le lingue (nessun A1 né C1).
+- I livelli vanno da A2 a C1 per tutte le lingue (nessun A1); B2 e C1 hanno piano di 8 settimane, grammatica avanzata e liste di vocabolario più impegnative.
 - Un verbo non in elenco può non esistere o essere irregolare: lo decide Claude e può sbagliare su verbi rari.
 - Il filtro sulle glosse tra parentesi (`suspiciousHint`) nell'inglese è più debole (accetta qualunque parola singola in lettere latine minuscole).
 - Il motore dei verbi inglese non copre i verbi modali (can, must…): sono trattati nella grammatica, non nelle tabelle.
