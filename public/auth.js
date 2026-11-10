@@ -231,6 +231,44 @@ var Auth = (function () {
     }
     var fbox = el('div', 'card'); m.appendChild(fbox);
     loadFeedback(fbox);
+
+    // importazione dai vecchi siti
+    var ibox = el('div', 'card'); m.appendChild(ibox);
+    function drawImport(sources, report, error) {
+      clear(ibox);
+      ibox.appendChild(el('h3', '', 'Importa utenti e dati dai vecchi siti'));
+      ibox.appendChild(el('p', 'muted', 'Copia utenti (con le loro password), ruoli, limiti, progressi di studio e lezioni già generate dagli archivi dei vecchi siti di spagnolo e portoghese. Non sovrascrive niente: chi esiste già e i dati già presenti restano come sono.'));
+      if (error) ibox.appendChild(el('p', 'err', error));
+      if (!sources.length) { ibox.appendChild(el('p', 'muted', 'Nessun vecchio sito collegato: servono le variabili LEGACY_TOKEN e LEGACY_ES_SITE_ID / LEGACY_PT_SITE_ID sul sito (vedi README).')); return; }
+      var names = { es: 'Spagnolo', pt: 'Portoghese' };
+      sources.forEach(function (id) {
+        var row = el('div', 'row'); row.style.margin = '6px 0';
+        row.appendChild(el('b', '', (names[id] || id) + ' (vecchio sito)'));
+        function run(dry) {
+          if (!dry && !confirm('Copiare i dati del vecchio sito (' + (names[id] || id) + ') in questo sito?')) return;
+          api('POST', '/api/admin/import', { source: id, dry: dry }).then(function (r) { drawImport(sources, r.ok ? { id: id, data: r.json } : null, r.ok ? '' : (r.json.error || 'Importazione non riuscita.')); });
+        }
+        var b1 = el('button', 'small', 'Anteprima'); b1.addEventListener('click', function () { run(true); });
+        var b2 = el('button', 'small', 'Copia'); b2.addEventListener('click', function () { run(false); });
+        row.appendChild(b1); row.appendChild(b2);
+        ibox.appendChild(row);
+      });
+      if (report) {
+        var d = report.data;
+        var lines = [
+          (d.dry ? 'ANTEPRIMA (non è stato copiato niente) · ' : 'COPIATO · ') + (names[report.id] || report.id),
+          'Utenti copiati: ' + (d.users.copied.join(', ') || 'nessuno'),
+          'Già presenti (non toccati): ' + (d.users.existing.join(', ') || 'nessuno'),
+          'Inviti mai accettati (da rifare): ' + (d.users.pending.join(', ') || 'nessuno'),
+          'Dati di studio copiati per: ' + (d.data.copied.join(', ') || 'nessuno'),
+          'Dati non copiati: ' + (d.data.skipped.join('; ') || 'nessuno'),
+          'Lezioni e liste copiate: ' + d.cache.copied + ' (già presenti: ' + d.cache.skipped + ')'
+        ];
+        var pre = el('div', 'verdict ' + (d.dry ? 'warn' : 'ok')); pre.style.whiteSpace = 'pre-wrap'; pre.textContent = lines.join('\n');
+        ibox.appendChild(pre);
+      }
+    }
+    api('GET', '/api/admin/import').then(function (r) { drawImport(r.ok ? r.json.sources : [], null, r.ok ? '' : (r.json.error || '')); });
     }
 
     function load() {

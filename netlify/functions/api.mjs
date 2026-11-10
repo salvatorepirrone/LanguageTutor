@@ -10,7 +10,14 @@ const readEnv = () => Object.fromEntries(VARS.map((k) => [k, Netlify.env.get(k) 
 export default async (req, context) => {
   // Archivio dei dati (utenti, progressi, lezioni in cache). Su Netlify si configura da solo.
   const blobs = getStore({ name: env('BLOBS_STORE') || 'tutor', consistency: 'strong' });
-  return handle(req, { blobs, env: readEnv(), ip: context.ip });
+  // Archivi dei vecchi siti (spagnolo e portoghese), solo per lo strumento di importazione: servono un token Netlify e l'id di ogni sito.
+  const legacy = {};
+  const token = env('LEGACY_TOKEN');
+  for (const [id, store] of [['es', 'spagnolo'], ['pt', 'portugues']]) {
+    const siteID = env('LEGACY_' + id.toUpperCase() + '_SITE_ID');
+    if (siteID && token) legacy[id] = () => getStore({ name: env('LEGACY_' + id.toUpperCase() + '_STORE') || store, siteID, token, consistency: 'strong' });
+  }
+  return handle(req, { blobs, env: readEnv(), ip: context.ip, legacy });
 };
 
 export const config = { path: ['/api', '/api/*'] };

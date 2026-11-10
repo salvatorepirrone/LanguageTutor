@@ -3,6 +3,7 @@
 import { HttpError, makeStore, prefixStore, verifyPassword } from './util.mjs';
 import * as auth from './auth.mjs';
 import * as feedback from './feedback.mjs';
+import { importLegacy } from './legacy.mjs';
 import { LANGS } from './langs/index.mjs';
 
 const BASE_HEADERS = { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store', 'x-content-type-options': 'nosniff' };
@@ -104,6 +105,18 @@ async function route(req, deps) {
     if ((sess.user.role || 'user') !== 'admin') throw new HttpError(403, 'Riservato agli amministratori.');
     if (method === 'GET') return out({ users: await auth.listUsers(store), me: sess.name });
     if (method === 'POST') return out(await auth.adminAction(store, origin, sess.name, await body(req)));
+  }
+
+  // ---- importazione dai vecchi siti (solo amministratori): deps.legacy[lingua]() apre l'archivio del vecchio sito, se è configurato
+  if (path === '/api/admin/import') {
+    if ((sess.user.role || 'user') !== 'admin') throw new HttpError(403, 'Riservato agli amministratori.');
+    if (method === 'GET') return out({ sources: Object.keys(LANGS).filter((id) => deps.legacy && deps.legacy[id]) });
+    if (method === 'POST') {
+      const b = await body(req);
+      const open = deps.legacy && deps.legacy[String(b.source)];
+      if (!open) throw new HttpError(400, 'Origine non configurata: servono le variabili LEGACY_… sul sito (vedi README).');
+      return out(await importLegacy(store, open(), String(b.source), { dry: !!b.dry }));
+    }
   }
 
   // ---- feedback (uguale per tutte le lingue)

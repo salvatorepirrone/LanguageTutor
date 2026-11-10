@@ -12,4 +12,5 @@ export class MemoryBlobs {
     return { modified: true, etag };
   }
   async delete(key) { this.m.delete(key); }
+  async list({ prefix = '' } = {}) { return { blobs: [...this.m.keys()].filter((k) => k.startsWith(prefix)).map((key) => ({ key })), directories: [] }; }
 }
