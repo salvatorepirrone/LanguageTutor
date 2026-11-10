@@ -21,6 +21,10 @@
   var main = document.getElementById('main');
   api('GET', '/api/auth/me').then(function (r) {
     if (r.status === 401) { location.href = '/login.html'; return; }
+    if (!r.ok) {   // per esempio variabili d'ambiente mancanti sul sito: meglio dirlo che mostrare una pagina con dati vuoti
+      main.appendChild(el('div', 'card err', 'Impossibile aprire Language Tutor: ' + (r.json.error || 'il server non risponde') + '.'));
+      return;
+    }
     var me = r.json;
     var box = document.getElementById('me');
     var a = el('a', '', '👤 ' + me.user); a.href = '/account.html'; box.appendChild(a);
