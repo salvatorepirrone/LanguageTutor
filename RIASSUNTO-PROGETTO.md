@@ -58,3 +58,5 @@ e non si sviluppano più. Anche il repository vuoto `speakenglish` non è usato 
 - Collegare il repository al progetto Netlify dello spagnolo con `BLOBS_STORE=spagnolo` e fare un solo deploy (vedi README e `ELENCO-DEPLOY.md`).
 - Provare tutto con il vero Claude, quando Node sarà disponibile.
 - Rendere il Claude simulato della demo consapevole della lingua (oggi risponde sempre in spagnolo di prova).
+
+- **Vercel**: lo stesso codice gira anche su Vercel (`api/[...path].js`, `vercel.json`) con Redis di Upstash al posto dei Blobs (`netlify/lib/redis-blobs.mjs`, prova `redis.test.mjs`). Mai pubblicato né provato su Vercel vero: le prove usano un Redis finto.

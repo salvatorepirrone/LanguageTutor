@@ -176,13 +176,13 @@ export function fakeClaude(counter, opts = {}) {
 
 const API = '/api/es';
 
-export async function run({ iterations = 1000 } = {}) {
+export async function run({ iterations = 1000, blobs: givenBlobs } = {}) {
   setIterations(iterations);
   const results = [];
   let failures = 0;
   const ok = (cond, name, extra = '') => { results.push((cond ? 'OK   ' : 'FAIL ') + name + (cond ? '' : ' ' + extra)); if (!cond) failures++; };
 
-  const blobs = new MemoryBlobs();
+  const blobs = givenBlobs || new MemoryBlobs();
   const counter = { n: 0 };
   const fetchImpl = fakeClaude(counter);
   let lastCookie = null;

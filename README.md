@@ -83,6 +83,20 @@ gli utenti e i dati dello spagnolo si ritrovano al loro posto. Gli account dell'
 Poi apri `https://<sito>.netlify.app/setup.html` (solo se non esiste ancora un amministratore), accedi e invita le persone da `/admin.html`.
 Il pulsante *Trigger deploy* è disattivato se le build sono fermate: riattivale in *Continuous deployment* e rifermale a deploy finito, per non consumare crediti a ogni push.
 
+## Pubblicare su Vercel (alternativa a Netlify)
+
+Lo stesso codice gira anche su Vercel: il sito statico è `public/`, la funzione è `api/[...path].js` e la configurazione è `vercel.json`. Cambia solo l'archivio dei dati:
+al posto dei Blobs di Netlify si usa **Redis di Upstash** (adattatore `netlify/lib/redis-blobs.mjs`, senza dipendenze). Su Vercel non ci sono crediti per deploy.
+
+1. Su Vercel: *Add New… → Project*, importa il repository `LanguageTutor` da GitHub. Lascia vuoti il comando di build e l'impostazione del framework (vengono da `vercel.json`).
+2. Nel progetto, scheda *Storage* (o *Marketplace*): crea un database **Upstash Redis** (piano gratuito) e collegalo al progetto. Vercel imposta da solo `KV_REST_API_URL` e `KV_REST_API_TOKEN`
+   (vanno bene anche `UPSTASH_REDIS_REST_URL` e `UPSTASH_REDIS_REST_TOKEN`).
+3. In *Settings → Environment Variables* aggiungi `ANTHROPIC_API_KEY`, `SESSION_SECRET` (almeno 32 caratteri), `SETUP_TOKEN` e, meglio, `PUBLIC_URL` (l'indirizzo del sito, per i link di invito).
+4. Fai il deploy, poi apri `https://<progetto>.vercel.app/setup.html` con il `SETUP_TOKEN` per creare l'amministratore.
+
+Differenze rispetto a Netlify: l'archivio è un altro (i dati non si condividono con un sito Netlify), lo strumento *Importa dai vecchi siti* non è disponibile (legge solo archivi Netlify),
+e la durata massima delle funzioni è impostata a 120 secondi in `vercel.json` (controlla i limiti del tuo piano). Le prove dell'adattatore sono in `netlify/test/redis.test.mjs`.
+
 ## Accessi
 
 - Solo su invito (link a uso singolo, valido 7 giorni); un account vale per tutte le lingue.
@@ -115,10 +129,10 @@ Le prove si eseguono nel browser servendo il repository (la demo lo fa), da una 
 
 ```js
 const m = await import('/netlify/test/backend.test.mjs');   // spagnolo; poi pt.test.mjs e en.test.mjs
-console.log(await m.run());                                  // { failures: 0, total: 93, ... }
+console.log(await m.run());                                  // { failures: 0, total: 106, ... }
 ```
 
-Spagnolo 93 prove, portoghese 87, inglese 93. Dopo aver modificato un file, ricarica la pagina (il browser tiene i moduli in cache).
+Spagnolo 106 prove, portoghese 87, inglese 93, adattatore Redis (`redis.test.mjs`) 107. Dopo aver modificato un file, ricarica la pagina (il browser tiene i moduli in cache).
 
 ## Aggiungere una lingua
 
