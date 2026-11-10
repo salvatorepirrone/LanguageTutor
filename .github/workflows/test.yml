@@ -1,0 +1,14 @@
+# Prove automatiche a ogni push: girano su GitHub, non costano crediti Netlify e non pubblicano niente.
+name: Prove
+on:
+  push:
+  pull_request:
+jobs:
+  prove:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: node tools/run-tests.mjs
