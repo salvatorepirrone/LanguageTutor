@@ -1,7 +1,7 @@
 // Azioni del tutor (conversazione, suggerimenti, lezioni, esercizi, vocabolario, test): chiamano Claude e salvano i progressi.
 import {
   CFG, DATA, HttpError, str, today, addDays, pickN, pickOne, shuffle, loadData, updateData, logActivity, addErrors, deckAdd, stats,
-  topicById, vocabThemeById, profileOf, planOf, weekIndex, publicProfile, levelText, levelLabel, scenarios, grammar, remember, recentOf,
+  topicById, vocabThemeById, profileOf, planOf, weekIndex, publicProfile, levelText, levelLabel, scenarios, tutorList, tutorById, grammar, remember, recentOf,
   dropRepeats, normStem, pickTopic, LEVELS,
 } from './core.mjs';
 import { quotaHit, limitOf, usageToday } from '../../auth.mjs';
@@ -62,6 +62,7 @@ export async function state(ctx) {
     plan: planOf(prof), week: weekIndex(prof, ctx.now), stats: stats(d, ctx.now),
     scenarios: Object.entries(scenarios()).map(([id, s]) => ({ id, label: s.label })),
     profile: publicProfile(prof), needsPlacement: !prof.placed, levels: LEVELS,
+    tutors: tutorList().map((t) => ({ id: t.id, name: t.name, avatar: t.avatar, age: t.age, from: t.from, job: t.job, trait: t.trait, interests: t.interests })), tutor: tutorById(d.tutor).id,
     grammar: grammar(), themes: DATA.vocabThemes.map((t) => ({ id: t.id, title: t.title })),
     deadline: CFG.DEADLINE, start: CFG.START,
     me: { user: ctx.user, role: ctx.userRec.role || 'user', limit: limitOf(ctx.userRec), used: await usageToday(ctx.root, ctx.user) },
@@ -99,9 +100,14 @@ export async function chat(ctx, inp) {
   // Personaggio della conversazione: lo crea il tutor al primo messaggio (generico per la chiacchierata libera, su misura per le situazioni:
   // cameriere, concierge, medico…), si presenta e presenta la situazione; il browser lo rimanda a ogni turno così resta lo stesso.
   const pin = inp.persona && typeof inp.persona === 'object' ? { name: str(inp.persona.name, 40), role: str(inp.persona.role, 160) } : null;
-  const persona = pin && pin.name ? pin : null;
+  // Chiacchierata libera: il tutor è quello scelto dallo studente (sempre lo stesso, con la sua storia); nelle situazioni il personaggio si crea su misura.
+  const tutor = mode === 'conversazione' && scenario === 'libero' ? tutorById(d.tutor) : null;
+  const starting = !(inp.persona && typeof inp.persona === 'object' && inp.persona.name);
+  const persona = tutor ? { name: tutor.name, role: tutor.job + ' di ' + tutor.from } : (pin && pin.name ? pin : null);
   const needPersona = mode === 'conversazione' && !persona;
-  const personaText = mode !== 'conversazione' ? '' : persona
+  const personaText = mode !== 'conversazione' ? '' : tutor
+    ? `IL TUO PERSONAGGIO (è il tutor scelto dallo studente, sempre lo stesso): ${tutor.name}, ${tutor.age} anni, ${tutor.job} di ${tutor.from}. Carattere: ${tutor.trait}. Interessi: ${tutor.interests}. Come parli: ${tutor.style}. Resta sempre in parte: non cambiare nome né dati su di te e non inventare una vita diversa da questa.\n${starting ? 'INIZIO DELLA SESSIONE: nel "reply" di questo primo messaggio saluta, presentati con il tuo nome (e, se ti viene naturale, dì in una frase dove vivi e cosa fai), poi fai una prima domanda semplice allo studente su di lui o sulla sua giornata; per questo solo messaggio puoi usare fino a 4 frasi.\n' : ''}\n`
+    : persona
     ? `IL TUO PERSONAGGIO: ${persona.name}, ${persona.role}. Resta sempre in parte, con lo stesso carattere e le stesse informazioni su di te: non cambiare nome né ruolo.\n\n`
     : `INIZIO DELLA SESSIONE: crea il tuo personaggio ${scenario === 'libero'
       ? 'per una chiacchierata di tutti i giorni: una persona con un nome plausibile, un mestiere, la città dove vive e un tratto di carattere (per esempio un vicino di casa, una collega, un amico di amici)'
@@ -564,6 +570,14 @@ export async function verbCheck(ctx, inp) {
 
 // ---------------------------------------------------------------- livello e piano
 
+// Ogni studente sceglie il proprio tutor (per la chiacchierata libera); la scelta resta nel suo profilo.
+export async function tutorSet(ctx, inp) {
+  const t = tutorList().find((x) => x.id === String(inp.tutor || ''));
+  if (!t) throw new HttpError(400, 'Tutor sconosciuto');
+  await updateData(ctx.store, ctx.user, (dd) => { dd.tutor = t.id; return dd; });
+  return { tutor: t.id };
+}
+
 export async function profileSet(ctx, inp) {
   const level = String(inp.level || '');
   if (!LEVELS.includes(level)) throw new HttpError(400, 'Livello non valido');
@@ -640,5 +654,5 @@ export async function testResult(ctx, inp) {
 
 export const ACTIONS = {
   chat, hint, grammar: lesson, exercises, grade, record_exercise: recordExercise, vocab, deck_add: deckAddAction, deck: deckList,
-  deck_review: deckReview, deck_review_many: deckReviewMany, grade_vocab: gradeVocab, verb_check: verbCheck, verb_italian: verbItalian, profile_set: profileSet, test, writing, test_result: testResult,
+  deck_review: deckReview, deck_review_many: deckReviewMany, grade_vocab: gradeVocab, verb_check: verbCheck, verb_italian: verbItalian, profile_set: profileSet, tutor_set: tutorSet, test, writing, test_result: testResult,
 };

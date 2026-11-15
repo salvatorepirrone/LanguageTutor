@@ -246,3 +246,9 @@ html[data-lang=hub]{--bg:#f4f4fa;--card:#fdfdff;--text:#1f2238;--muted:#626783;-
 .langcard h3{margin:8px 0 2px;font-size:20px}
 .langcard .lvl{margin-top:10px;font-size:14px;color:var(--muted)}
 .langcard .go{margin-top:12px;font-weight:600;color:var(--accent)}
+/* Scelta del tutor */
+.tutorgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;margin-top:10px}
+.tutorcard{border:1px solid var(--line);border-radius:var(--radius);padding:12px 14px;background:var(--card);display:flex;flex-direction:column;gap:4px;font-size:14px}
+.tutorcard.on{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent-soft)}
+.tutorcard .ava{font-size:34px;line-height:1.1}
+.tutorcard button{margin-top:auto;align-self:flex-start}

@@ -52,6 +52,9 @@ export function deckAdd(d, es, it, ex, theme, now = new Date(), syn = []) {
 // ---------------------------------------------------------------- catalogo, livello e piano
 
 export const scenarios = () => DATA.scenarios;
+// Tutor tra cui ogni studente sceglie con chi fare la chiacchierata libera (il primo è quello di partenza).
+export const tutorList = () => DATA.tutors || [];
+export const tutorById = (id) => tutorList().find((t) => t.id === id) || tutorList()[0];
 export const grammar = () => DATA.grammar;
 
 export function topicById(id) {

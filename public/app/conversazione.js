@@ -239,6 +239,38 @@
     send({ start: true });
   }
 
+  // ---- scelta del tutor: la persona con cui si fa la chiacchierata libera (resta la stessa, con la sua storia)
+  function currentTutor() { var c = SP.catalog || {}, l = c.tutors || []; return l.filter(function (t) { return t.id === c.tutor; })[0] || l[0]; }
+  function tutorLabel() { var t = currentTutor(); return t ? t.avatar + ' ' + t.name : 'Tutor'; }
+  function openTutors() {
+    if (ui.tutorPanel.firstChild) { SP.clear(ui.tutorPanel); return; }
+    var wrap = el('div', 'card');
+    wrap.appendChild(el('h3', '', 'Scegli il tuo tutor'));
+    wrap.appendChild(el('p', 'muted', 'È la persona con cui fai la chiacchierata libera: resta sempre la stessa, con il suo carattere e la sua storia. Nelle situazioni (ristorante, medico…) il tutor interpreta di volta in volta il personaggio adatto.'));
+    var grid = el('div', 'tutorgrid');
+    (SP.catalog.tutors || []).forEach(function (t) {
+      var mine = t.id === SP.catalog.tutor;
+      var card = el('div', 'tutorcard' + (mine ? ' on' : ''));
+      card.appendChild(el('div', 'ava', t.avatar));
+      card.appendChild(el('b', '', t.name));
+      card.appendChild(el('div', 'muted', t.age + ' anni · ' + t.job + ' di ' + t.from));
+      card.appendChild(el('div', '', t.trait));
+      card.appendChild(el('div', 'muted', 'Interessi: ' + t.interests));
+      var b = el('button', mine ? '' : 'primary', mine ? 'Il tuo tutor' : 'Scegli');
+      b.disabled = mine;
+      b.addEventListener('click', function () { chooseTutor(t); });
+      card.appendChild(b); grid.appendChild(card);
+    });
+    wrap.appendChild(grid); ui.tutorPanel.appendChild(wrap);
+  }
+  function chooseTutor(t) {
+    SP.call({ action: 'tutor_set', tutor: t.id }).then(function () { return SP.reload(); }).then(function () {
+      ui.tutorBtn.textContent = tutorLabel(); SP.clear(ui.tutorPanel);
+      if (ui.mode.value === 'conversazione' && ui.scenario.value === 'libero' && history.length) restart();   // la sessione in corso passa al nuovo tutor
+      else note('Il tuo tutor per la chiacchierata libera è ' + t.name + '.');
+    }).catch(function (e) { note(e.message, 'err'); });
+  }
+
   function build() {
     ui = {};
     var bar = el('div', 'bar');
@@ -249,7 +281,10 @@
     ui.scenario = el('select'); ui.scenario.setAttribute('aria-label', 'Scenario');
     SP.catalog.scenarios.forEach(function (s) { var op = el('option', '', s.label); op.value = s.id; ui.scenario.appendChild(op); });
     var restartBtn = el('button', 'primary', 'Inizia'); ui.restartBtn = restartBtn;
-    bar.appendChild(ui.mode); bar.appendChild(ui.scenario); bar.appendChild(restartBtn);
+    ui.tutorBtn = el('button', '', tutorLabel()); ui.tutorBtn.title = 'Scegli il tuo tutor'; ui.tutorBtn.setAttribute('aria-label', 'Scegli il tuo tutor');
+    ui.tutorBtn.addEventListener('click', openTutors);
+    ui.tutorPanel = el('div');
+    bar.appendChild(ui.mode); bar.appendChild(ui.scenario); bar.appendChild(ui.tutorBtn); bar.appendChild(restartBtn);
     var m = SP.pref('mode'), s = SP.pref('scenario');
     if (m) ui.mode.value = m;
     if (s) ui.scenario.value = s;
@@ -289,13 +324,13 @@
     ui.box.addEventListener('keydown', function (e) { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); } });
     ui.box.addEventListener('input', function () { boxFromVoice = false; ui.box.style.height = 'auto'; ui.box.style.height = Math.min(ui.box.scrollHeight, 120) + 'px'; });
 
-    ui.parts = [bar, ui.log, foot];
+    ui.parts = [bar, ui.tutorPanel, ui.log, foot];
   }
 
   SP.sections.conversazione = {
     mount: function (root) {
       var fresh = !ui;
-      if (fresh) build();
+      if (fresh) build(); else ui.tutorBtn.textContent = tutorLabel();
       ui.parts.forEach(function (p) { root.appendChild(p); });
       if (fresh) showIntro(); else scrollDown();
     },
