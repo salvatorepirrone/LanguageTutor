@@ -120,6 +120,9 @@ Per attivarlo servono queste variabili d'ambiente sul sito nuovo (ambito Functio
 | `LEGACY_PT_SITE_ID` | id del vecchio progetto del portoghese (`hablaportoguese`): `a1e27e46-b1a7-400d-b997-eba86c30e25b` |
 | `LEGACY_ES_STORE`, `LEGACY_PT_STORE` | (facoltative) nome dell'archivio vecchio; di solito `spagnolo` e `portugues` |
 
+Gli utenti con lo stesso nome che esistono già nel nuovo sito (per esempio il tuo) non vengono toccati. Per sostituirli con la versione del vecchio sito (password e progressi di quella lingua)
+fai prima l'**Anteprima**, spunta il loro nome sotto il riquadro del risultato e premi **Copia**: il ruolo di amministratore non si abbassa mai, ma chi viene sostituito deve accedere di nuovo con la vecchia password.
+
 Poi, da `/admin.html`: **Anteprima** (mostra cosa verrebbe copiato, senza copiare) e **Copia**. Si può ripetere senza rischi. A import finito si possono togliere le variabili `LEGACY_*`
 e il token.
 
@@ -129,10 +132,10 @@ Le prove si eseguono nel browser servendo il repository (la demo lo fa), da una 
 
 ```js
 const m = await import('/netlify/test/backend.test.mjs');   // spagnolo; poi pt.test.mjs e en.test.mjs
-console.log(await m.run());                                  // { failures: 0, total: 116, ... }
+console.log(await m.run());                                  // { failures: 0, total: 121, ... }
 ```
 
-Spagnolo 116 prove, portoghese 97, inglese 103, adattatore Redis (`redis.test.mjs`) 117. Dopo aver modificato un file, ricarica la pagina (il browser tiene i moduli in cache).
+Spagnolo 121 prove, portoghese 97, inglese 103, adattatore Redis (`redis.test.mjs`) 122. Dopo aver modificato un file, ricarica la pagina (il browser tiene i moduli in cache).
 
 ## Aggiungere una lingua
 

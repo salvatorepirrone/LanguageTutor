@@ -312,6 +312,22 @@ export async function run({ iterations = 1000, blobs: givenBlobs } = {}) {
   ok(r.status === 200 && r.json.profile.level === 'B1', 'importazione: stesso utente anche nel portoghese');
   r = await call('GET', '/api/en', { cookie: jar.maria });
   ok(r.status === 200 && r.json.needsPlacement === true, 'importazione: l\'inglese parte da zero con il test di ingresso');
+  // sostituzione di un utente già presente: password, limite e dati dal vecchio sito; l'amministratore non perde il ruolo
+  await old.setJSON('users', { salvatore: { hash: oldHash, role: 'user', limit: 11 }, maria: { hash: oldHash, role: 'user', limit: 55 } });
+  await old.setJSON('data/maria', { days: { '2026-10-09': 7 }, errors: [], vocab: [], deck: {}, ex: {}, tests: [], profile: { level: 'B2', placed: true } });
+  r = await call('POST', '/api/admin/import', { cookie: jar.salvatore, legacy, body: { source: 'es', dry: true, replace: ['maria'] } });
+  ok(r.status === 200 && r.json.users.replaced.join() === 'maria' && r.json.users.existing.join() === 'salvatore', 'importazione: l\'anteprima indica chi verrebbe sostituito', JSON.stringify(r.json.users));
+  r = await call('POST', '/api/admin/import', { cookie: jar.salvatore, legacy, body: { source: 'es' } });
+  ok(r.status === 200 && r.json.users.replaced.length === 0 && r.json.users.existing.sort().join() === 'maria,salvatore', 'importazione: senza richiesta esplicita nessun utente viene sostituito');
+  r = await call('POST', '/api/admin/import', { cookie: jar.salvatore, legacy, body: { source: 'es', replace: ['maria'] } });
+  ok(r.status === 200 && r.json.users.replaced.join() === 'maria' && r.json.data.copied.join() === 'maria (sostituiti)', 'importazione: utente sostituito con dati e password del vecchio sito', JSON.stringify(r.json));
+  r = await call('GET', API, { cookie: jar.maria });
+  ok(r.status === 200 && r.json.profile.level === 'B2' && r.json.me.limit === 55, 'importazione: dopo la sostituzione valgono livello e limite del vecchio sito', JSON.stringify(r.json.profile));
+  r = await call('POST', '/api/admin/users', { cookie: jar.salvatore, body: { do: 'role', user: 'maria', role: 'admin' } });
+  r = await call('POST', '/api/admin/import', { cookie: jar.salvatore, legacy, body: { source: 'es', replace: ['maria'] } });
+  r = await call('GET', '/api/admin/users', { cookie: jar.salvatore });
+  ok(r.status === 200 && r.json.users.some((u) => u.user === 'maria' && u.role === 'admin'), 'importazione: il ruolo di amministratore non si abbassa nella sostituzione');
+  r = await call('POST', '/api/admin/users', { cookie: jar.salvatore, body: { do: 'role', user: 'maria', role: 'user' } });
   r = await call('POST', '/api/admin/users', { cookie: jar.salvatore, body: { do: 'role', user: 'salvatore', role: 'user' } });
   ok(r.status === 409, 'deve restare un admin');
   r = await call('POST', '/api/admin/users', { cookie: jar.salvatore, body: { do: 'limit', user: 'guest', limit: 2 } });

@@ -10,24 +10,32 @@ async function listKeys(blobs, prefix) {
 }
 
 // `rootStore`: archivio del nuovo sito; `srcBlobs`: archivio del vecchio sito (interfaccia di @netlify/blobs); `lang`: es o pt.
-export async function importLegacy(rootStore, srcBlobs, lang, { dry = false } = {}) {
+// `replace`: nomi di utenti già presenti nel nuovo sito da sostituire con la versione del vecchio (password e dati di studio di questa lingua);
+// il ruolo di amministratore non si abbassa mai, per non restare senza accesso.
+export async function importLegacy(rootStore, srcBlobs, lang, { dry = false, replace = [] } = {}) {
   const L = LANGS[lang];
   if (!L) throw new HttpError(400, 'Lingua sconosciuta');
   const src = makeStore(srcBlobs);
   const old = await src.read('users', {});
   const current = await rootStore.read('users', {});
-  const report = { lang, dry, users: { copied: [], existing: [], pending: [] }, data: { copied: [], skipped: [] }, cache: { copied: 0, skipped: 0 } };
+  const want = new Set((Array.isArray(replace) ? replace : []).map(String));
+  const report = { lang, dry, users: { copied: [], replaced: [], existing: [], pending: [] }, data: { copied: [], skipped: [] }, cache: { copied: 0, skipped: 0 } };
 
   // utenti: si copia il record intero (la password resta valida)
-  const toAdd = {};
+  const toAdd = {}, toReplace = {};
   for (const [name, rec] of Object.entries(old)) {
     if (!rec || typeof rec !== 'object') continue;
-    if (current[name]) report.users.existing.push(name);
+    if (current[name] && want.has(name) && rec.hash && !rec.pending) { report.users.replaced.push(name); toReplace[name] = rec; }
+    else if (current[name]) report.users.existing.push(name);
     else if (rec.pending || !rec.hash) report.users.pending.push(name);   // invito mai accettato: il link non si porta dietro, va rifatto
     else { report.users.copied.push(name); toAdd[name] = rec; }
   }
-  if (!dry && Object.keys(toAdd).length) {
-    await rootStore.update('users', {}, (u) => { for (const [n, r] of Object.entries(toAdd)) if (!u[n]) u[n] = r; return u; });
+  if (!dry && (Object.keys(toAdd).length || Object.keys(toReplace).length)) {
+    await rootStore.update('users', {}, (u) => {
+      for (const [n, r] of Object.entries(toAdd)) if (!u[n]) u[n] = r;
+      for (const [n, r] of Object.entries(toReplace)) if (u[n]) u[n] = { ...r, role: u[n].role === 'admin' ? 'admin' : r.role };
+      return u;
+    });
   }
 
   // dati di studio, sotto il prefisso della lingua; solo per gli utenti che esistono nel nuovo sito
@@ -36,11 +44,12 @@ export async function importLegacy(rootStore, srcBlobs, lang, { dry = false } = 
     const name = key.slice('data/'.length);
     if (!known.has(name)) { report.data.skipped.push(name + ' (utente non copiato)'); continue; }
     const dest = L.prefix + key;
-    if (await rootStore.read(dest, null)) { report.data.skipped.push(name + ' (ha già dati)'); continue; }
+    const replacing = !!toReplace[name];
+    if (!replacing && await rootStore.read(dest, null)) { report.data.skipped.push(name + ' (ha già dati)'); continue; }
     const val = await src.read(key, null);
     if (val == null) continue;
     if (!dry) await rootStore.write(dest, val);
-    report.data.copied.push(name);
+    report.data.copied.push(name + (replacing ? ' (sostituiti)' : ''));
   }
 
   // lezioni e liste di vocabolario già generate: risparmiano richieste a Claude

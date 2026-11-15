@@ -115,7 +115,7 @@ async function route(req, deps) {
       const b = await body(req);
       const open = deps.legacy && deps.legacy[String(b.source)];
       if (!open) throw new HttpError(400, 'Origine non configurata: servono le variabili LEGACY_… sul sito (vedi README).');
-      return out(await importLegacy(store, open(), String(b.source), { dry: !!b.dry }));
+      return out(await importLegacy(store, open(), String(b.source), { dry: !!b.dry, replace: b.replace }));
     }
   }
 
