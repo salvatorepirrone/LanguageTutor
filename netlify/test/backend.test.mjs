@@ -134,7 +134,7 @@ export function fakeClaude(counter, opts = {}) {
     const sys = b.system;
     counter.last = { system: sys, messages: b.messages, thinking: b.thinking };
     let payload;
-    if (sys.includes('MODALITÀ')) payload = { reply: 'Hola, ¿qué tal?', corrections: [{ original: 'yo soy 20', corrected: 'tengo 20 años', note: 'Età con tener.', cat: 'ser/estar' }], suggestion: 'Tengo veinte años.', vocab: [{ es: 'la cena', it: 'la cena' }] };
+    if (sys.includes('MODALITÀ')) payload = { persona: sys.includes('INIZIO DELLA SESSIONE') ? { name: 'Marta', role: 'cameriera di prova' } : undefined, reply: 'Hola, ¿qué tal?', corrections: [{ original: 'yo soy 20', corrected: 'tengo 20 años', note: 'Età con tener.', cat: 'ser/estar' }], suggestion: 'Tengo veinte años.', vocab: [{ es: 'la cena', it: 'la cena' }] };
     else if (sys.includes('Livello 1 (pista)')) payload = { hint: b.messages[0].content.includes('Livello richiesto: 2') ? 'La palabra es «huelga».' : 'Es cuando no se trabaja.', word: 'la huelga', it: 'lo sciopero' };
     else if (sys.includes('lezione di grammatica')) payload = { summary: 'Riassunto', blocks: [{ heading: 'Forme', text: 'Testo', table: { headers: ['a', 'b'], rows: [['1', '2']] }, examples: [{ es: 'Lo veo.', it: 'Lo vedo.' }] }], mistakes: [{ wrong: 'x', right: 'y', why: 'z' }], tips: ['t'] };
     else if (sys.includes('Crea esercizi')) {
@@ -330,10 +330,17 @@ export async function run({ iterations = 1000, blobs: givenBlobs } = {}) {
   ok(r.status === 200 && r.json.topic && r.json.reply, 'chat: saluto con argomento');
   ok(counter.last.thinking && counter.last.thinking.type === 'between_tools', 'chat: ragionamento spento');
   ok(counter.last.system.includes('livello A2'), 'chat: prompt adattato al livello A2');
+  ok(r.json.persona && r.json.persona.name === 'Marta' && counter.last.system.includes('INIZIO DELLA SESSIONE') && counter.last.system.includes('presentati con il nome e il ruolo') && counter.last.system.includes('il cameriere di un ristorante'), 'chat: all\'inizio crea il personaggio, si presenta e presenta la situazione', JSON.stringify(r.json.persona));
+  const p1 = r.json.persona;
   const t1 = r.json.topic;
-  r = await call('POST', API, { cookie: S, body: { action: 'chat', messages: [{ role: 'assistant', text: 'Hola' }, { role: 'user', text: 'yo soy 20' }], mode: 'conversazione', scenario: 'ristorante', topic: t1 } });
+  r = await call('POST', API, { cookie: S, body: { action: 'chat', messages: [{ role: 'assistant', text: 'Hola' }, { role: 'user', text: 'yo soy 20' }], mode: 'conversazione', scenario: 'ristorante', topic: t1, persona: p1 } });
   ok(r.status === 200 && r.json.corrections.length === 1 && r.json.topic === t1 && r.json.stats.todayTurns === 1, 'chat: correzione, stesso argomento, attività registrata');
   ok(r.json.stats.vocabCount === 1, 'chat: parola nel mazzo');
+  ok(counter.last.system.includes('IL TUO PERSONAGGIO: Marta') && !counter.last.system.includes('INIZIO DELLA SESSIONE') && r.json.persona.name === 'Marta', 'chat: i turni successivi restano nel personaggio');
+  r = await call('POST', API, { cookie: S, body: { action: 'chat', messages: [], mode: 'conversazione', scenario: 'libero', topic: '' } });
+  ok(r.status === 200 && counter.last.system.includes('INIZIO DELLA SESSIONE') && counter.last.system.includes('chiacchierata di tutti i giorni'), 'chat: la chiacchierata libera ha un personaggio generico');
+  r = await call('POST', API, { cookie: S, body: { action: 'chat', messages: [], mode: 'quiz', scenario: 'libero', topic: '' } });
+  ok(r.status === 200 && !counter.last.system.includes('INIZIO DELLA SESSIONE') && !counter.last.system.includes('IL TUO PERSONAGGIO') && !r.json.persona, 'chat: il quiz non ha personaggio');
   r = await call('POST', API, { cookie: S, body: { action: 'hint', level: 1, draft: 'sciopero', messages: [{ role: 'assistant', text: '¿Por qué llegaste tarde?' }] } });
   ok(r.status === 200 && r.json.hint.includes('trabaja'), 'hint livello 1');
   r = await call('POST', API, { cookie: S, body: { action: 'hint', level: 2, draft: 'sciopero', messages: [] } });

@@ -129,10 +129,10 @@ Le prove si eseguono nel browser servendo il repository (la demo lo fa), da una 
 
 ```js
 const m = await import('/netlify/test/backend.test.mjs');   // spagnolo; poi pt.test.mjs e en.test.mjs
-console.log(await m.run());                                  // { failures: 0, total: 106, ... }
+console.log(await m.run());                                  // { failures: 0, total: 110, ... }
 ```
 
-Spagnolo 106 prove, portoghese 87, inglese 93, adattatore Redis (`redis.test.mjs`) 107. Dopo aver modificato un file, ricarica la pagina (il browser tiene i moduli in cache).
+Spagnolo 110 prove, portoghese 91, inglese 97, adattatore Redis (`redis.test.mjs`) 111. Dopo aver modificato un file, ricarica la pagina (il browser tiene i moduli in cache).
 
 ## Aggiungere una lingua
 

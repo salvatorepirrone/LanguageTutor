@@ -17,6 +17,7 @@ e non si sviluppano più. Anche il repository vuoto `speakenglish` non è usato 
 - L'utente chiede quasi sempre commit e push dopo ogni modifica, su `main`. Messaggi di commit in italiano, con `Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>` in fondo.
 - Si risponde in italiano; l'utente è sbrigativo e preferisce risultati verificati e un riepilogo onesto di limiti e cose non provate.
 - Non creo account né password per conto dell'utente.
+- **Le modifiche vanno sempre fatte su tutte le lingue** (spagnolo, portoghese, inglese), salvo diversa indicazione.
 - Il nuovo utente di una lingua comincia con il test di livello e tutta l'esperienza (grammatica, esercizi, conversazione) si basa sul suo livello.
 - Il pulsante **💬 Feedback** è in ogni pagina dopo l'accesso: le segnalazioni stanno in `feedback/log` (archivio comune) e l'amministratore le legge in `/admin.html` («Copia quelli da leggere» per incollarle in una chat). Claude non può leggere il registro online da solo.
 
@@ -60,3 +61,4 @@ e non si sviluppano più. Anche il repository vuoto `speakenglish` non è usato 
 - Rendere il Claude simulato della demo consapevole della lingua (oggi risponde sempre in spagnolo di prova).
 
 - **Vercel**: lo stesso codice gira anche su Vercel (`api/[...path].js`, `vercel.json`) con Redis di Upstash al posto dei Blobs (`netlify/lib/redis-blobs.mjs`, prova `redis.test.mjs`). Mai pubblicato né provato su Vercel vero: le prove usano un Redis finto.
+- **Conversazione**: all'inizio il tutor crea un personaggio (generico per la chiacchierata libera, su misura per le situazioni: cameriere, concierge, medico…), si presenta e presenta la situazione; il browser rimanda il personaggio a ogni turno (campo `persona`).

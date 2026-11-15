@@ -4,6 +4,7 @@
   var el = SP.el;
   var ui = null;                 // elementi creati una volta sola e riattaccati a ogni visita
   var history = [];              // {role:'user'|'assistant', text}
+  var persona = null;           // personaggio della sessione (nome e ruolo), creato dal tutor al primo messaggio e rimandato a ogni turno
   var topic = '';                // argomento della sessione, scelto dal server alla prima risposta
   var busy = false, listening = false, lastVoice = false, rec = null;
   var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -166,12 +167,16 @@
     if (text) { history.push({ role: 'user', text: text }); addMsg('user', text); ui.box.value = ''; ui.box.style.height = ''; boxFromVoice = false; committed = ''; }
     busy = true; ui.send.disabled = true;
     var wait = el('div', 'sys', '…'); ui.log.appendChild(wait); scrollDown();
-    SP.call({ action: 'chat', messages: history, mode: ui.mode.value, scenario: ui.scenario.value, voice: voice, topic: topic })
+    SP.call({ action: 'chat', messages: history, mode: ui.mode.value, scenario: ui.scenario.value, voice: voice, topic: topic, persona: persona })
       .then(function (r) {
         wait.remove();
         if (!topic && r.topic) {
           topic = r.topic;
           note((ui.mode.value === 'conversazione' ? 'Oggi: ' : 'Contesto: ') + r.topic, 'sys');
+        }
+        if (!persona && r.persona && r.persona.name) {
+          persona = r.persona;
+          note('Con chi parli: ' + persona.name + (persona.role ? ' — ' + persona.role : ''), 'sys');
         }
         if (text) addFeedback(r);
         history.push({ role: 'assistant', text: r.reply });
@@ -228,7 +233,7 @@
   function restart() {
     ui.restartBtn.textContent = 'Nuova sessione';
     stopListening(false); SP.stopSpeaking();
-    history = []; topic = ''; SP.clear(ui.log);
+    history = []; topic = ''; persona = null; SP.clear(ui.log);
     SP.pref('mode', ui.mode.value); SP.pref('scenario', ui.scenario.value);
     note('Premi 🎤 per parlare o scrivi. Ti correggo dopo ogni frase.');
     send({ start: true });
