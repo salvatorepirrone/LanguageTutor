@@ -4,7 +4,8 @@
   var LANGS = [
     { id: 'es', flag: '🇪🇸', title: 'Spagnolo', text: 'Spagnolo della Spagna: conversazione, esercizi, grammatica, vocabolario, verbi e test.' },
     { id: 'pt', flag: '🇧🇷', title: 'Portoghese', text: 'Portoghese del Brasile: conversazione, esercizi, grammatica, vocabolario, verbi e test.' },
-    { id: 'en', flag: '🇬🇧', title: 'Inglese', text: 'Inglese britannico: conversazione, esercizi, grammatica, vocabolario, verbi e test.' }
+    { id: 'en', flag: '🇬🇧', title: 'Inglese', text: 'Inglese britannico: conversazione, esercizi, grammatica, vocabolario, verbi e test.' },
+    { id: 'fr', flag: '🇫🇷', title: 'Francese', text: 'Francese di Francia: conversazione, esercizi, grammatica, vocabolario, verbi e test.' }
   ];
   function el(tag, cls, text) {
     var e = document.createElement(tag);

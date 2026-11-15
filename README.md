@@ -1,6 +1,6 @@
 # Language Tutor
 
-Tutor di lingue per italiani: **inglese** (britannico), **spagnolo** (Spagna) e **portoghese** (Brasile). Un solo sito, un solo accesso, tre app.
+Tutor di lingue per italiani: **inglese** (britannico), **spagnolo** (Spagna), **portoghese** (Brasile) e **francese** (Francia). Un solo sito, un solo accesso, quattro app.
 Il tutor è Claude, chiamato solo dal server: nessuna chiave nel browser né in questo repository.
 
 Ogni lingua ha le stesse sezioni, tutte basate sul livello della persona:
@@ -25,7 +25,7 @@ In ogni pagina dopo l'accesso c'è il pulsante **💬 Feedback**: le segnalazion
 ```
 public/                sito statico
   index.html, hub.js     pagina delle lingue (dopo l'accesso)
-  es/ pt/ en/            una cartella per lingua: index.html, lang.js (impostazioni), coniugatore.js (motore dei verbi)
+  es/ pt/ en/ fr/         una cartella per lingua: index.html, lang.js (impostazioni), coniugatore.js (motore dei verbi)
   app/                   script comuni a tutte le lingue (home, conversazione, esercizi, grammatica, vocabolario, verbi, test…)
   login.html, invito.html, account.html, admin.html, setup.html, auth.js     accessi (uno solo per tutte le lingue)
   feedback.js, style.css                                                    pulsante feedback e stile (un tema per lingua)
@@ -36,8 +36,8 @@ netlify/test/          prove della logica (archivio in memoria, Claude simulato)
 tools/demo.py          demo locale
 ```
 
-Indirizzi dell'API: `/api/auth/*` e `/api/admin/*` (accessi), `/api/feedback`, `/api/<lingua>` (`es`, `pt`, `en`: stato e azioni del tutor).
-I dati di ogni lingua stanno nello stesso archivio con un prefisso: `pt/…` e `en/…`; lo spagnolo è senza prefisso, per restare compatibile con il primo sito
+Indirizzi dell'API: `/api/auth/*` e `/api/admin/*` (accessi), `/api/feedback`, `/api/<lingua>` (`es`, `pt`, `en`, `fr`: stato e azioni del tutor).
+I dati di ogni lingua stanno nello stesso archivio con un prefisso: `pt/…`, `en/…` e `fr/…`; lo spagnolo è senza prefisso, per restare compatibile con il primo sito
 (un solo store chiamato `spagnolo`). Il limite giornaliero di richieste a Claude è unico per persona, su tutte le lingue.
 
 ## Provare in locale, senza deploy
@@ -131,11 +131,11 @@ e il token.
 Le prove si eseguono nel browser servendo il repository (la demo lo fa), da una pagina qualsiasi:
 
 ```js
-const m = await import('/netlify/test/backend.test.mjs');   // spagnolo; poi pt.test.mjs e en.test.mjs
+const m = await import('/netlify/test/backend.test.mjs');   // spagnolo; poi pt.test.mjs, en.test.mjs e fr.test.mjs
 console.log(await m.run());                                  // { failures: 0, total: 121, ... }
 ```
 
-Spagnolo 121 prove, portoghese 97, inglese 103, adattatore Redis (`redis.test.mjs`) 122. Dopo aver modificato un file, ricarica la pagina (il browser tiene i moduli in cache).
+Spagnolo 121 prove, portoghese 97, inglese 103, francese 103, adattatore Redis (`redis.test.mjs`) 122. Dopo aver modificato un file, ricarica la pagina (il browser tiene i moduli in cache).
 
 ## Aggiungere una lingua
 
@@ -149,5 +149,5 @@ Spagnolo 121 prove, portoghese 97, inglese 103, adattatore Redis (`redis.test.mj
 - Le funzioni sincrone di Netlify durano al massimo 60 secondi; le chiamate più lente (test, liste, lezioni) ne usano 15-50 alla prima generazione, poi il risultato resta in cache.
 - Lezioni, liste di vocabolario ed esercizi sono generati da Claude e non sono riletti da un insegnante.
 - Il microfono richiede Chrome, Edge o Safari e una connessione a internet.
-- Il motore dei verbi inglese coniuga con regole e con circa 160 verbi irregolari; un verbo non in elenco viene verificato dal tutor.
+- Il motore dei verbi inglese coniuga con regole e con circa 160 verbi irregolari; quello francese con le regole dei tre gruppi (con le particolarità ortografiche) e circa 80 irregolari, e mostra il participio dei verbi con «être» come allé(e)(s); un verbo non in elenco viene verificato dal tutor.
 - I livelli vanno da A2 a C1 per tutte le lingue (B2 è l'upper-intermediate, puntando al C1); gli argomenti avanzati stanno nella sezione «Avanzato (B2-C1)» della grammatica.

@@ -130,7 +130,7 @@ var SP = (function () {
   }
   function strip(s) { return norm(s).normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/ñ/g, 'n'); }
   // Chi risponde spesso scrive anche il soggetto ("yo fui"): lo si accetta se la risposta attesa non lo contiene.
-  function withoutSubject(s) { return s.replace(new RegExp('^(' + TUTOR.subjects + ')\\s+'), ''); }
+  function withoutSubject(s) { return s.replace(new RegExp('^(?:(?:' + TUTOR.subjects + ')\\s+' + (TUTOR.elision ? '|' + TUTOR.elision : '') + ')'), ''); }
   // Ritorna 'ok', 'accent' (giusta ma senza accenti/ñ) oppure 'no'.
   // Con opts.articles (test di vocabolario) l'articolo si può omettere ("aguacate" per "el aguacate") e una risposta attesa
   // può avere varianti separate da "/", "," o ";" e commenti tra parentesi ("ganar (ue)").

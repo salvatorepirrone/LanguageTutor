@@ -4,8 +4,8 @@ Ultimo aggiornamento: 10 novembre 2026. Scritto per riprendere il lavoro senza l
 
 ## Cos'è
 
-**Language Tutor**: tutor di lingue per un utente italiano (livello iniziale appena sotto il B1): **inglese** britannico, **spagnolo** della Spagna, **portoghese** del Brasile.
-Un solo sito, un solo accesso (inviti, ruoli admin/user/guest), un solo progetto Netlify, tre app (`/en/`, `/es/`, `/pt/`). Repository: `https://github.com/salvatorepirrone/Languagetutor`,
+**Language Tutor**: tutor di lingue per un utente italiano (livello iniziale appena sotto il B1): **inglese** britannico, **spagnolo** della Spagna, **portoghese** del Brasile, **francese** di Francia.
+Un solo sito, un solo accesso (inviti, ruoli admin/user/guest), un solo progetto Netlify, quattro app (`/en/`, `/es/`, `/pt/`, `/fr/`). Repository: `https://github.com/salvatorepirrone/Languagetutor`,
 cartella locale `C:\Users\salva\LanguageTutor`, ramo `main`.
 
 I repository precedenti, **`SpanishTutor`** (`C:\Users\salva\SpanishTutor`) e **`PortugueseTutor`** (`C:\Users\salva\PortugueseTutor`), sono la storia dei due progetti separati: restano come archivio
@@ -27,14 +27,14 @@ e non si sviluppano più. Anche il repository vuoto `speakenglish` non è usato 
   `lang.js` definisce `window.TUTOR` (nome, voce, verbi, testi) letto dagli script comuni. Stile con un tema per lingua (`html[data-lang=…]`).
 - **Backend** `netlify/`: `functions/api.mjs` (entrata), `lib/router.mjs`, `lib/auth.mjs`, `lib/feedback.mjs`, `lib/util.mjs`, e una cartella per lingua in `lib/langs/<lingua>/` (`core.mjs`, `actions.mjs`, `data.mjs`).
   Indirizzi: `/api/auth/*`, `/api/admin/*`, `/api/feedback`, `/api/<lingua>`.
-- **Archivio**: Netlify Blobs. I dati di ogni lingua hanno un prefisso (`pt/`, `en/`); lo spagnolo è senza prefisso per restare compatibile con il vecchio sito (store `spagnolo`, impostabile con `BLOBS_STORE`).
+- **Archivio**: Netlify Blobs. I dati di ogni lingua hanno un prefisso (`pt/`, `en/`, `fr/`); lo spagnolo è senza prefisso per restare compatibile con il vecchio sito (store `spagnolo`, impostabile con `BLOBS_STORE`).
 - **Claude**: chiamato solo dal server, modello `claude-sonnet-5-5`, prompt JSON. Il limite giornaliero di richieste per persona è unico (150, guest 30).
 - **Variabili d'ambiente**: `ANTHROPIC_API_KEY`, `SESSION_SECRET`, `SETUP_TOKEN`, `PUBLIC_URL`, `BLOBS_STORE`.
 
 ## Come provare senza deploy
 
 - **Demo**: `py tools/demo.py`, poi `http://127.0.0.1:18080/`. Backend vero nel browser, Claude **simulato** (risposte di prova, in spagnolo anche per le altre lingue), utente `demo` già dentro.
-- **Prove**: dalla demo, `const m = await import('/netlify/test/backend.test.mjs?x='+Date.now()); await m.run()` (spagnolo, 93 prove); `pt.test.mjs` (87); `en.test.mjs` (93). Dopo modifiche ricaricare la pagina.
+- **Prove**: dalla demo, `const m = await import('/netlify/test/backend.test.mjs?x='+Date.now()); await m.run()` (spagnolo, 93 prove); `pt.test.mjs` (97); `en.test.mjs` (103); `fr.test.mjs` (103). Dopo modifiche ricaricare la pagina.
 - **Con il vero Claude**: servono Node.js 22+ e `npx netlify-cli dev`. **Mai provato**: sul computer non c'è Node.
 - Su Windows con Git Bash: per modifiche lunghe usare uno script Python (`py -I`), le heredoc sono fragili; controllare `git diff --stat` per i fine riga.
 
@@ -63,3 +63,4 @@ e non si sviluppano più. Anche il repository vuoto `speakenglish` non è usato 
 - **Vercel**: lo stesso codice gira anche su Vercel (`api/[...path].js`, `vercel.json`) con Redis di Upstash al posto dei Blobs (`netlify/lib/redis-blobs.mjs`, prova `redis.test.mjs`). Mai pubblicato né provato su Vercel vero: le prove usano un Redis finto.
 - **Conversazione**: all'inizio il tutor crea un personaggio (generico per la chiacchierata libera, su misura per le situazioni: cameriere, concierge, medico…), si presenta e presenta la situazione; il browser rimanda il personaggio a ogni turno (campo `persona`).
 - **Tutor a scelta**: per la chiacchierata libera ogni lingua ha 4 tutor (nome, età, città, mestiere, carattere, interessi; catalogo `tutors` in `data.mjs`). Ogni utente sceglie il suo dal pulsante nella barra della Conversazione (azione `tutor_set`, salvato nel profilo della lingua, di partenza il primo). Nelle situazioni (ristorante, medico…) il personaggio resta creato su misura.
+- **Francese** (aggiunto a novembre 2026): stesse funzioni delle altre lingue. Catalogo di grammatica (7 sezioni con «Avanzato»), piani A2-C1, quattro tutor (Camille, Antoine, Marguerite, Lucas), motore dei verbi con i tre gruppi, particolarità ortografiche (ç, ge, y→i, è, raddoppio) e circa 80 irregolari; il participio dei verbi con être è mostrato come allé(e)(s) e si accetta anche senza (e). Accordo del participio con il complemento oggetto non modellato.

@@ -13,7 +13,7 @@ const LOCK_SECONDS = 300;
 const IP_MAX_FAILS = 20;
 const COOKIE = 'tutor_session';
 // Prefissi con cui ogni lingua conserva i dati dello studente (vedi langs/index.mjs): lo spagnolo è senza prefisso per compatibilità con il primo sito.
-const DATA_PREFIXES = ['', 'pt/', 'en/'];
+const DATA_PREFIXES = ['', 'pt/', 'en/', 'fr/'];
 
 const nowSec = () => Math.floor(Date.now() / 1000);
 
