@@ -78,7 +78,7 @@ export function fakeClaude(counter) {
         : w.startsWith('irr') ? { exists: true, it: 'verbo irregolare di prova', regular: false, note: 'Ha un presente irregolare.', suggestions: [] }
         : { exists: true, it: 'ronzare', regular: true, note: 'Verbo regolare.', suggestions: [] };
     }
-    else if (sys.includes('lista di vocabolario')) payload = { words: Array.from({ length: 24 }, (_, i) => ({ es: 'a palavra' + i, it: 'parola ' + i, ex: 'Exemplo ' + i, exit: 'Esempio ' + i, type: 'nome' })) };
+    else if (/lista di (vocabolario|terminologia)/.test(sys)) payload = { words: Array.from({ length: 24 }, (_, i) => ({ es: 'a palavra' + i, it: 'parola ' + i, ex: 'Exemplo ' + i, exit: 'Esempio ' + i, type: 'nome' })) };
     else if (sys.includes('test di livello')) {
       const secs = ['tempi', 'forme', 'lessico', 'comprensione'];
       payload = { items: Array.from({ length: 20 }, (_, i) => ({ type: 'scelta', section: secs[Math.floor(i / 5)], level: ['A2', 'B1', 'B2'][i % 3], q: `Domanda test numero ${i} ${counter.n}`, text: i >= 15 ? 'Testo breve.' : undefined, options: ['a', 'b', 'c', 'd'], answer: i % 4, why: 'perché' })) };

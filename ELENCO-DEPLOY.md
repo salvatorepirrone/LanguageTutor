@@ -8,7 +8,7 @@ Si lavora direttamente su `main`: commit e push non costano nulla perché le bui
 - [ ] Ho raccolto tutte le modifiche che voglio mettere online? Meglio un deploy con molte cose che tre deploy con poche.
 - [ ] Ho provato in locale con la demo (`py tools/demo.py`, poi `http://127.0.0.1:18080/`)?
 - [ ] Le prove del backend passano, per tutte le lingue? Nel browser, sulla pagina della demo:
-  `for (const f of ['backend', 'pt', 'en', 'fr']) { const m = await import('/netlify/test/' + f + '.test.mjs?x=' + Date.now()); console.log(f, (await m.run()).failures); }` deve dare `0` quattro volte.
+  `for (const f of ['backend', 'pt', 'en', 'fr', 'enmed', 'frmed']) { const m = await import('/netlify/test/' + f + '.test.mjs?x=' + Date.now()); console.log(f, (await m.run()).failures); }` deve dare `0` sei volte.
 - [ ] Se possibile, ho provato con il vero Claude (`npx netlify-cli dev`, serve Node.js 22+)? Finora non è mai stato fatto.
 - [ ] I crediti rimasti bastano? (Netlify → Team → Usage).
 
@@ -33,7 +33,7 @@ Si lavora direttamente su `main`: commit e push non costano nulla perché le bui
 ## 5. Dopo il deploy
 
 - [ ] Aprire il sito e fare l'accesso; dopo la migrazione dal vecchio sito si riaccede una volta.
-- [ ] Nella pagina delle lingue compaiono inglese, spagnolo, portoghese e francese.
+- [ ] Nella pagina delle lingue compaiono inglese, spagnolo, portoghese, francese e, nella sezione «Per medici», inglese e francese per medici.
 - [ ] In una lingua: provare una conversazione e un esercizio (usano il vero Claude); in Verbi, un verbo in elenco e uno che non c'è.
 - [ ] Inviare un feedback di prova e controllare che compaia in `/admin.html`.
 - [ ] Controllare nella pagina Deploys che non ci siano deploy extra e annotare i crediti rimasti.

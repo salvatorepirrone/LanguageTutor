@@ -5,7 +5,9 @@
     { id: 'es', flag: '🇪🇸', title: 'Spagnolo', text: 'Spagnolo della Spagna: conversazione, esercizi, grammatica, vocabolario, verbi e test.' },
     { id: 'pt', flag: '🇧🇷', title: 'Portoghese', text: 'Portoghese del Brasile: conversazione, esercizi, grammatica, vocabolario, verbi e test.' },
     { id: 'en', flag: '🇬🇧', title: 'Inglese', text: 'Inglese britannico: conversazione, esercizi, grammatica, vocabolario, verbi e test.' },
-    { id: 'fr', flag: '🇫🇷', title: 'Francese', text: 'Francese di Francia: conversazione, esercizi, grammatica, vocabolario, verbi e test.' }
+    { id: 'fr', flag: '🇫🇷', title: 'Francese', text: 'Francese di Francia: conversazione, esercizi, grammatica, vocabolario, verbi e test.' },
+    { id: 'enmed', flag: '🩺🇬🇧', title: 'Inglese per medici', group: 'Per medici', text: 'Cardiologia: terminologia tecnica, anamnesi, consenso informato, presentazione dei casi e scrittura scientifica.' },
+    { id: 'frmed', flag: '🩺🇫🇷', title: 'Francese per medici', group: 'Per medici', text: 'Cardiologia: terminologia tecnica, anamnesi, consenso informato, presentazione dei casi e scrittura scientifica.' }
   ];
   function el(tag, cls, text) {
     var e = document.createElement(tag);
@@ -39,8 +41,9 @@
 
     main.appendChild(el('h2', '', 'Ciao, ' + me.user + ' 👋'));
     main.appendChild(el('p', 'muted', 'Scegli la lingua che vuoi studiare. Con lo stesso accesso trovi tutte le lingue; ognuna parte dal test di livello e prepara un piano sul tuo livello.'));
-    var grid = el('div', 'langs'); main.appendChild(grid);
+    var grid = el('div', 'langs'), lastGroup = ''; main.appendChild(grid);
     LANGS.forEach(function (L) {
+      if (L.group && L.group !== lastGroup) { lastGroup = L.group; main.appendChild(el('div', 'langgroup', L.group)); grid = el('div', 'langs'); main.appendChild(grid); }
       var card = el('a', 'langcard'); card.href = '/' + L.id + '/';
       card.appendChild(el('div', 'flag', L.flag));
       card.appendChild(el('h3', '', L.title));

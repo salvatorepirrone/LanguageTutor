@@ -223,6 +223,7 @@ var SPV = (function () {
   }
 
   return {
+    add: function (list, tags) { regulars(list, tags || ''); },
     PERSONS: PERSONS, IMP_PERSONS: IMP_PERSONS, TENSES: TENSES, verbs: V, full: full, conj: conj, parse: parse, suggest: suggest, plausible: plausible, alts: alts,
     list: function () { return Object.keys(V).sort(); },
     irregularTop: ['be', 'have', 'do', 'go', 'get', 'make', 'take', 'come', 'see', 'know', 'think', 'say', 'tell', 'give', 'find', 'leave', 'feel', 'bring', 'buy', 'put', 'keep', 'begin',

@@ -163,8 +163,8 @@ export function fakeClaude(counter, opts = {}) {
         : { exists: true, it: 'ronzare', regular: true, note: 'Verbo regolare.', suggestions: [] };
     }
     else if (sys.includes('test di vocabolario')) payload = { results: JSON.parse(b.messages[0].content).map((x) => ({ ok: x.answer.startsWith('sin'), note: x.answer.startsWith('sin') ? 'sinonimo valido di ' + x.es : 'significa altro' })) };
-    else if (sys.includes('lista di vocabolario') && opts.realVocab) payload = { words: demoWords(b.messages[0].content) };
-    else if (sys.includes('lista di vocabolario')) payload = { words: Array.from({ length: 24 }, (_, i) => ({ es: 'la palabra' + i, it: 'parola ' + i, syn: ['el vocablo' + i], ex: 'Ejemplo ' + i, exit: 'Esempio ' + i, type: 'nome' })) };
+    else if (/lista di (vocabolario|terminologia)/.test(sys) && opts.realVocab) payload = { words: demoWords(b.messages[0].content) };
+    else if (/lista di (vocabolario|terminologia)/.test(sys)) payload = { words: Array.from({ length: 24 }, (_, i) => ({ es: 'la palabra' + i, it: 'parola ' + i, syn: ['el vocablo' + i], ex: 'Ejemplo ' + i, exit: 'Esempio ' + i, type: 'nome' })) };
     else if (sys.includes('test di livello')) {
       const secs = ['tempi', 'forme', 'lessico', 'comprensione'];
       payload = { items: Array.from({ length: 20 }, (_, i) => ({ type: 'scelta', section: secs[Math.floor(i / 5)], level: ['A2', 'B1', 'B2'][i % 3], q: `Domanda test numero ${i} ${counter.n}`, text: i >= 15 ? 'Testo breve.' : undefined, options: ['a', 'b', 'c', 'd'], answer: i % 4, why: 'perché' })) };

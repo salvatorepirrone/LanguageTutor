@@ -1,6 +1,6 @@
 # Language Tutor
 
-Tutor di lingue per italiani: **inglese** (britannico), **spagnolo** (Spagna), **portoghese** (Brasile) e **francese** (Francia). Un solo sito, un solo accesso, quattro app.
+Tutor di lingue per italiani: **inglese** (britannico), **spagnolo** (Spagna), **portoghese** (Brasile) e **francese** (Francia), più due versioni **per medici** (inglese e francese, cardiologia). Un solo sito, un solo accesso, sei app.
 Il tutor è Claude, chiamato solo dal server: nessuna chiave nel browser né in questo repository.
 
 Ogni lingua ha le stesse sezioni, tutte basate sul livello della persona:
@@ -20,12 +20,30 @@ sono separati per lingua; gli account sono uno solo per tutte.
 
 In ogni pagina dopo l'accesso c'è il pulsante **💬 Feedback**: le segnalazioni finiscono in un registro che l'amministratore legge in fondo a `/admin.html`.
 
+## Inglese e francese per medici (cardiologia)
+
+Due versioni delle app pensate per medici, cardiologi in particolare, con l'obiettivo di **fornire e rafforzare la terminologia tecnica**. Hanno le stesse sezioni delle altre lingue, ma:
+
+- **Livelli** B1, B1+, B2 e C1 (il test d'ingresso e la scelta del livello usano solo questi).
+- **Vocabolario**: 28 temi di terminologia medica (anatomia, sintomi, anamnesi, esame obiettivo, ECG, imaging, laboratorio, cardiopatia ischemica, scompenso, aritmie, valvulopatie,
+  farmaci e anticoagulanti, procedure e dispositivi, emergenza, comunicazione con il paziente, ricerca e scrittura scientifica, abbreviazioni e radici greco-latine…), con test di scrittura,
+  sinonimi, abbreviazioni e, quando c'è, il termine per il paziente. Le parole finiscono nel mazzo con ripasso a intervalli.
+- **Conversazione**: otto scenari clinici (anamnesi con un paziente, visita di controllo, giro visite e consegne, consulto tra specialisti, consenso informato, emergenza, presentazione a un congresso,
+  chiacchierata tra colleghi) e tutor che sono colleghi (cardiologa, specializzando, infermiera specializzata, professore); il tutor corregge i termini imprecisi (categoria «terminologia»)
+  e il registro (tecnico o per il paziente).
+- **Esercizi e test**: frasi in contesto clinico con la terminologia al centro; il test ha una sezione di terminologia medica e vignette cliniche.
+- **Grammatica**: argomenti del linguaggio medico (anamnesi, descrizione dei sintomi, spiegare al paziente, rischi e probabilità, cattive notizie, case report, lettera di dimissione, SOAP e SBAR, risultati degli studi,
+  prudenza scientifica, radici greco-latine, abbreviazioni, falsi amici, misure e unità).
+- **Verbi**: lo stesso motore dell'inglese o del francese, con in più i verbi clinici (to auscultate, to prescribe, ausculter, prescrire…).
+
+I contenuti sono generati da Claude e **non sono rivisti da un medico madrelingua**: la terminologia va verificata prima di fidarsi di un termine dubbio.
+
 ## Struttura
 
 ```
 public/                sito statico
   index.html, hub.js     pagina delle lingue (dopo l'accesso)
-  es/ pt/ en/ fr/         una cartella per lingua: index.html, lang.js (impostazioni), coniugatore.js (motore dei verbi)
+  es/ pt/ en/ fr/ enmed/ frmed/   una cartella per lingua o versione: index.html, lang.js (impostazioni), coniugatore.js (motore dei verbi)
   app/                   script comuni a tutte le lingue (home, conversazione, esercizi, grammatica, vocabolario, verbi, test…)
   login.html, invito.html, account.html, admin.html, setup.html, auth.js     accessi (uno solo per tutte le lingue)
   feedback.js, style.css                                                    pulsante feedback e stile (un tema per lingua)
@@ -36,8 +54,8 @@ netlify/test/          prove della logica (archivio in memoria, Claude simulato)
 tools/demo.py          demo locale
 ```
 
-Indirizzi dell'API: `/api/auth/*` e `/api/admin/*` (accessi), `/api/feedback`, `/api/<lingua>` (`es`, `pt`, `en`, `fr`: stato e azioni del tutor).
-I dati di ogni lingua stanno nello stesso archivio con un prefisso: `pt/…`, `en/…` e `fr/…`; lo spagnolo è senza prefisso, per restare compatibile con il primo sito
+Indirizzi dell'API: `/api/auth/*` e `/api/admin/*` (accessi), `/api/feedback`, `/api/<lingua>` (`es`, `pt`, `en`, `fr`, `enmed`, `frmed`: stato e azioni del tutor).
+I dati di ogni lingua stanno nello stesso archivio con un prefisso: `pt/…`, `en/…`, `fr/…`, `enmed/…` e `frmed/…`; lo spagnolo è senza prefisso, per restare compatibile con il primo sito
 (un solo store chiamato `spagnolo`). Il limite giornaliero di richieste a Claude è unico per persona, su tutte le lingue.
 
 ## Provare in locale, senza deploy
@@ -131,11 +149,11 @@ e il token.
 Le prove si eseguono nel browser servendo il repository (la demo lo fa), da una pagina qualsiasi:
 
 ```js
-const m = await import('/netlify/test/backend.test.mjs');   // spagnolo; poi pt.test.mjs, en.test.mjs e fr.test.mjs
+const m = await import('/netlify/test/backend.test.mjs');   // spagnolo; poi pt, en, fr, enmed e frmed (…test.mjs)
 console.log(await m.run());                                  // { failures: 0, total: 121, ... }
 ```
 
-Spagnolo 121 prove, portoghese 97, inglese 103, francese 103, adattatore Redis (`redis.test.mjs`) 122. Dopo aver modificato un file, ricarica la pagina (il browser tiene i moduli in cache).
+Spagnolo 121 prove, portoghese 97, inglese 103, francese 103, inglese e francese per medici 103 ciascuno, adattatore Redis (`redis.test.mjs`) 122. Dopo aver modificato un file, ricarica la pagina (il browser tiene i moduli in cache).
 
 ## Aggiungere una lingua
 

@@ -4,9 +4,22 @@
   var el = SP.el;
   var SECTION_LABEL = { tempi: 'Tempi verbali', forme: 'Pronomi, preposizioni e forme', lessico: 'Vocabolario', comprensione: 'Comprensione scritta' };
   var WEIGHT = { A2: 1, B1: 2, B2: 3, C1: 4 };
+  if (TUTOR.lessicoLabel) SECTION_LABEL.lessico = TUTOR.lessicoLabel;   // nelle versioni per medici la sezione «lessico» è la terminologia
 
+  // Le lingue con meno livelli (versioni per medici) usano soglie proprie e livelli adattati a quelli disponibili.
+  var ORDER = ['A2', 'B1-', 'B1', 'B1+', 'B2', 'C1'];
+  function fit(level) {
+    var ls = (SP.catalog && SP.catalog.levels) || ORDER, i = ORDER.indexOf(level);
+    if (ls.indexOf(level) >= 0) return level;
+    for (var d = 1; d < ORDER.length; d++) {
+      if (ORDER[i + d] && ls.indexOf(ORDER[i + d]) >= 0) return ORDER[i + d];
+      if (ORDER[i - d] && ls.indexOf(ORDER[i - d]) >= 0) return ORDER[i - d];
+    }
+    return ls[0];
+  }
   function estimate(ratio) {
-    return ratio < 0.33 ? 'A2' : ratio < 0.48 ? 'B1-' : ratio < 0.62 ? 'B1' : ratio < 0.74 ? 'B1+' : ratio < 0.88 ? 'B2' : 'C1';
+    if (TUTOR.levelCuts) { for (var k = 0; k < TUTOR.levelCuts.length; k++) if (ratio < TUTOR.levelCuts[k][0]) return TUTOR.levelCuts[k][1]; return 'C1'; }
+    return fit(ratio < 0.33 ? 'A2' : ratio < 0.48 ? 'B1-' : ratio < 0.62 ? 'B1' : ratio < 0.74 ? 'B1+' : ratio < 0.88 ? 'B2' : 'C1');
   }
   var LEVEL_TEXT = {
     'A2': 'A2: base solida da consolidare',

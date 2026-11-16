@@ -1,7 +1,7 @@
 // Esegue in Node le prove del backend di tutte le lingue e dell'adattatore Redis (archivio in memoria, Claude simulato): non serve rete né chiavi.
 //   node tools/run-tests.mjs
 let bad = false;
-for (const name of ['backend', 'pt', 'en', 'fr', 'redis']) {
+for (const name of ['backend', 'pt', 'en', 'fr', 'enmed', 'frmed', 'redis']) {
   const m = await import('../netlify/test/' + name + '.test.mjs');
   const r = await m.run();
   console.log(`${name}: ${r.total - r.failures}/${r.total} prove superate`);

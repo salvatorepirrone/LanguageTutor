@@ -128,7 +128,7 @@ async function route(req, deps) {
   }
 
   // ---- il tutor: /api/<lingua> (GET = stato e profilo, POST = azioni)
-  const m = path.match(/^\/api\/([a-z]{2})$/);
+  const m = path.match(/^\/api\/([a-z]{2,8})$/);
   if (m && LANGS[m[1]]) {
     const L = LANGS[m[1]];
     const ctx = { ...base, store: prefixStore(store, L.prefix), lang: L.id };

@@ -309,6 +309,7 @@ var SPV = (function () {
   }
 
   return {
+    add: function (list, tags) { reg(list, tags || ''); },
     PERSONS: PERSONS, IMP_PERSONS: IMP_PERSONS, TENSES: TENSES, verbs: V, full: full, conj: conj, parse: parse, suggest: suggest, plausible: plausible, alts: alts, participleNote: participleNote,
     list: function () { return Object.keys(V).sort(); },
     irregularTop: ['être', 'avoir', 'aller', 'faire', 'dire', 'pouvoir', 'vouloir', 'savoir', 'devoir', 'venir', 'voir', 'prendre', 'mettre', 'partir', 'sortir', 'dormir', 'servir',

@@ -5,10 +5,14 @@ import * as es from './es/actions.mjs';
 import * as pt from './pt/actions.mjs';
 import * as en from './en/actions.mjs';
 import * as fr from './fr/actions.mjs';
+import * as enmed from './enmed/actions.mjs';
+import * as frmed from './frmed/actions.mjs';
 
 export const LANGS = {
   es: { id: 'es', prefix: '', ACTIONS: es.ACTIONS, state: es.state },
   pt: { id: 'pt', prefix: 'pt/', ACTIONS: pt.ACTIONS, state: pt.state },
   en: { id: 'en', prefix: 'en/', ACTIONS: en.ACTIONS, state: en.state },
   fr: { id: 'fr', prefix: 'fr/', ACTIONS: fr.ACTIONS, state: fr.state },
+  enmed: { id: 'enmed', prefix: 'enmed/', ACTIONS: enmed.ACTIONS, state: enmed.state },
+  frmed: { id: 'frmed', prefix: 'frmed/', ACTIONS: frmed.ACTIONS, state: frmed.state },
 };

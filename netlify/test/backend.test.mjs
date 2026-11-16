@@ -133,6 +133,18 @@ const LOC = {
     chat: { reply: 'Hello, how are you today?', sugg: 'I am twenty years old.', corr: { original: 'I have 20 years', corrected: 'I am 20 years old', note: 'In inglese l\'età si dice con be, non con have.', cat: 'tempi del passato' }, vocab: { es: 'the dinner', it: 'la cena' } },
     hint: ['It is when people stop working to protest.', 'The word is "the strike".', 'the strike'], example: { es: 'I see him every day.', it: 'Lo vedo ogni giorno.' },
     writing: { original: 'I have eaten yesterday', corrected: 'I ate yesterday', note: 'Con «ieri» si usa il past simple.', cat: 'tempi del passato', improved: 'Yesterday I ate pasta with my friends.' },
+    medItems: (s) => [
+      { type: 'completa', q: `The patient was ___ (admit) with chest pain ${s}.`, answer: 'admitted', alts: [], why: 'Passivo al passato.' },
+      { type: 'scelta', q: `A ___ is an abnormal heart sound ${s}.`, options: ['murmur', 'mumble', 'murder', 'memoir'], answer: 0, why: 'Soffio cardiaco.' },
+      { type: 'completa', q: `Please ___ (take) a deep breath and hold it ${s}.`, answer: 'take', alts: [], why: 'Imperativo.' },
+      { type: 'traduci', q: `Il paziente riferisce dolore toracico da due ore ${s}.`, ref: 'The patient reports chest pain for two hours.', why: 'For con una durata.' },
+      { type: 'scelta', q: `The doctor ___ the patient's heart with a stethoscope ${s}.`, options: ['auscultated', 'auscult', 'auscultating', 'auscultates'], answer: 0, why: 'Passato regolare.' },
+      { type: 'completa', q: `Atrial fibrillation is ___ (associate) with an increased risk of stroke ${s}.`, answer: 'associated', alts: [], why: 'Passivo.' },
+      { type: 'scelta', q: `"Heart attack" is the lay term for ___ ${s}.`, options: ['myocardial infarction', 'angina pectoris', 'pericarditis', 'arrhythmia'], answer: 0, why: 'Registro per il paziente.' },
+      { type: 'traduci', q: `La frazione di eiezione è ridotta ${s}.`, ref: 'The ejection fraction is reduced.', why: 'Terminologia.' },
+      { type: 'completa', q: `The ECG ___ (show) ST elevation in the inferior leads ${s}.`, answer: 'shows', alts: [], why: 'Terza persona.' },
+    ],
+    medWords: 'the heart | il cuore | | nome\nthe left ventricle | il ventricolo sinistro | | nome\nchest pain | dolore toracico | | nome\nshortness of breath | dispnea | dyspnoea | nome\npalpitations | palpitazioni | | nome\nblood pressure | pressione arteriosa | | nome\nejection fraction | frazione di eiezione | | nome\nmyocardial infarction (MI) | infarto miocardico | heart attack | abbreviazione\natrial fibrillation (AF) | fibrillazione atriale | | abbreviazione\nto auscultate | auscultare | | verbo\na murmur | un soffio cardiaco | | nome\nstenosis | stenosi | | nome\nto prescribe | prescrivere | | verbo',
     items: (s) => [
       { type: 'completa', q: `Yesterday I ___ (go) to the market ${s}.`, answer: 'went', alts: [], why: 'Past simple irregolare.' },
       { type: 'scelta', q: `She ___ a doctor ${s}.`, options: ['is', 'are', 'am', 'be'], answer: 0, why: 'Be alla terza persona.' },
@@ -152,6 +164,18 @@ const LOC = {
     chat: { reply: 'Bonjour, comment ça va aujourd\'hui ?', sugg: 'J\'ai vingt ans.', corr: { original: 'je suis 20 ans', corrected: 'j\'ai 20 ans', note: 'In francese l\'età si dice con avoir.', cat: 'presente irregolare' }, vocab: { es: 'le dîner', it: 'la cena' } },
     hint: ['C\'est quand on arrête de travailler pour protester.', 'Le mot est « la grève ».', 'la grève'], example: { es: 'Je le vois tous les jours.', it: 'Lo vedo ogni giorno.' },
     writing: { original: 'j\'ai mangé hier soir pizza', corrected: 'j\'ai mangé une pizza hier soir', note: 'Serve l\'articolo.', cat: 'articoli e partitivi', improved: 'Hier soir, j\'ai mangé une pizza avec des amis.' },
+    medItems: (s) => [
+      { type: 'completa', q: `Le patient a été ___ (hospitaliser) pour une douleur thoracique ${s}.`, answer: 'hospitalisé', alts: [], why: 'Passif au passé composé.' },
+      { type: 'scelta', q: `Un ___ est un bruit cardiaque anormal ${s}.`, options: ['souffle', 'soufflé', 'soupir', 'sifflet'], answer: 0, why: 'Souffle cardiaque.' },
+      { type: 'completa', q: `Veuillez ___ (inspirer) profondément ${s}.`, answer: 'inspirer', alts: [], why: 'Infinitif.' },
+      { type: 'traduci', q: `Il paziente riferisce dolore toracico da due ore ${s}.`, ref: 'Le patient signale une douleur thoracique depuis deux heures.', why: 'Depuis con una durata.' },
+      { type: 'scelta', q: `Le médecin ___ le cœur du patient avec un stéthoscope ${s}.`, options: ['ausculte', 'auscultes', 'auscultons', 'auscultez'], answer: 0, why: 'Presente.' },
+      { type: 'completa', q: `La fibrillation atriale est ___ (associer) à un risque accru d'AVC ${s}.`, answer: 'associée', alts: [], why: 'Accordo del participio.' },
+      { type: 'scelta', q: `« Crise cardiaque » est le terme courant pour ___ ${s}.`, options: ['infarctus du myocarde', 'angor', 'péricardite', 'arythmie'], answer: 0, why: 'Registro per il paziente.' },
+      { type: 'traduci', q: `La frazione di eiezione è ridotta ${s}.`, ref: "La fraction d'éjection est diminuée.", why: 'Terminologia.' },
+      { type: 'completa', q: `L'ECG ___ (montrer) un sus-décalage du segment ST ${s}.`, answer: 'montre', alts: [], why: 'Terza persona.' },
+    ],
+    medWords: "le cœur | il cuore | | nome\nle ventricule gauche | il ventricolo sinistro | | nome\nla douleur thoracique | dolore toracico | | nome\nla dyspnée | dispnea | | nome\nles palpitations | palpitazioni | | nome\nla tension artérielle | pressione arteriosa | | nome\nla fraction d'éjection | frazione di eiezione | | nome\nl'infarctus du myocarde (IDM) | infarto miocardico | crise cardiaque | abbreviazione\nla fibrillation atriale (FA) | fibrillazione atriale | | abbreviazione\nausculter | auscultare | | verbo\nun souffle | un soffio cardiaco | | nome\nle rétrécissement | stenosi | la sténose | nome\nprescrire | prescrivere | | verbo",
     items: (s) => [
       { type: 'completa', q: `Hier, je ___ (aller) au marché ${s}.`, answer: 'suis allé', alts: ['suis allée'], why: 'Passé composé con être.' },
       { type: 'scelta', q: `Nous ___ à la maison ${s}.`, options: ['sommes', 'êtes', 'suis', 'es'], answer: 0, why: 'Être con nous.' },
@@ -194,8 +218,8 @@ function localize(payload, sys, content) {
   if (payload.reply !== undefined && payload.corrections) { payload.reply = L.chat.reply; payload.suggestion = L.chat.sugg; payload.corrections = [{ ...L.chat.corr }]; payload.vocab = [L.chat.vocab]; }
   else if (payload.hint !== undefined) { payload.hint = /Livello richiesto: 2/.test(content) ? L.hint[1] : L.hint[0]; payload.word = L.hint[2]; }
   else if (payload.blocks) payload.blocks[0].examples = [L.example];
-  else if (payload.items && payload.items[0] && payload.items[0].type !== 'scelta' || (payload.items && /Crea esercizi/.test(sys))) payload.items = L.items(Math.floor(Math.random() * 90) + 10);
-  else if (payload.words) { const key = /Casa/.test(content) ? 'casa' : /Cibo/.test(content) ? 'cibo' : 'generico'; payload.words = L.words[key].split('\n').map((row) => row.split('|').map((x) => x.trim())).map((p) => ({ es: p[0], it: p[1], syn: (p[2] || '').split(',').map((x) => x.trim()).filter(Boolean), ex: 'Example sentence with «' + p[0] + '».', exit: 'Frase d\'esempio.', type: p[3] || 'nome' })); }
+  else if (payload.items && payload.items[0] && payload.items[0].type !== 'scelta' || (payload.items && /Crea esercizi/.test(sys))) payload.items = ((L.medItems && /medic[io] italian[io]/.test(sys)) ? L.medItems : L.items)(Math.floor(Math.random() * 90) + 10);
+  else if (payload.words) { const key = /Casa/.test(content) ? 'casa' : /Cibo/.test(content) ? 'cibo' : 'generico'; payload.words = (L.medWords && /terminologia medica/.test(sys) ? L.medWords : L.words[key]).split('\n').map((row) => row.split('|').map((x) => x.trim())).map((p) => ({ es: p[0], it: p[1], syn: (p[2] || '').split(',').map((x) => x.trim()).filter(Boolean), ex: 'Example sentence with «' + p[0] + '».', exit: 'Frase d\'esempio.', type: p[3] || 'nome' })); }
   else if (payload.corrections && payload.improved) { const w = L.writing; payload.corrections = [{ original: w.original, corrected: w.corrected, note: w.note, cat: w.cat }]; payload.improved = w.improved; }
   return payload;
 }
@@ -236,8 +260,8 @@ export function fakeClaude(counter, opts = {}) {
         : { exists: true, it: 'ronzare', regular: true, note: 'Verbo regolare.', suggestions: [] };
     }
     else if (sys.includes('test di vocabolario')) payload = { results: JSON.parse(b.messages[0].content).map((x) => ({ ok: x.answer.startsWith('sin'), note: x.answer.startsWith('sin') ? 'sinonimo valido di ' + x.es : 'significa altro' })) };
-    else if (sys.includes('lista di vocabolario') && opts.realVocab) payload = { words: demoWords(b.messages[0].content) };
-    else if (sys.includes('lista di vocabolario')) payload = { words: Array.from({ length: 24 }, (_, i) => ({ es: 'la palabra' + i, it: 'parola ' + i, syn: ['el vocablo' + i], ex: 'Ejemplo ' + i, exit: 'Esempio ' + i, type: 'nome' })) };
+    else if (/lista di (vocabolario|terminologia)/.test(sys) && opts.realVocab) payload = { words: demoWords(b.messages[0].content) };
+    else if (/lista di (vocabolario|terminologia)/.test(sys)) payload = { words: Array.from({ length: 24 }, (_, i) => ({ es: 'la palabra' + i, it: 'parola ' + i, syn: ['el vocablo' + i], ex: 'Ejemplo ' + i, exit: 'Esempio ' + i, type: 'nome' })) };
     else if (sys.includes('test di livello')) {
       const secs = ['tempi', 'forme', 'lessico', 'comprensione'];
       payload = { items: Array.from({ length: 20 }, (_, i) => ({ type: 'scelta', section: secs[Math.floor(i / 5)], level: ['A2', 'B1', 'B2'][i % 3], q: `Domanda test numero ${i} ${counter.n}`, text: i >= 15 ? 'Testo breve.' : undefined, options: ['a', 'b', 'c', 'd'], answer: i % 4, why: 'perché' })) };

@@ -12,6 +12,9 @@
     { level: 'C1', title: 'Avanzato (C1)', text: 'Mi esprimo con precisione e naturalezza; voglio rifinire stile, registro e sfumature.' }
   ];
 
+  // Solo i livelli previsti dalla lingua (le versioni per medici partono dal B1).
+  function choices() { var ls = (SP.catalog && SP.catalog.levels) || []; return CHOICES.filter(function (c) { return ls.indexOf(c.level) >= 0; }); }
+
   function mount(root) {
     var page = el('div', 'page');
     var name = SP.catalog && SP.catalog.me ? SP.catalog.me.user : '';
@@ -28,7 +31,7 @@
 
     page.appendChild(el('div', 'sec-title', 'Oppure scegli tu il livello'));
     var area = el('div');
-    CHOICES.forEach(function (c) {
+    choices().forEach(function (c) {
       var b = el('button', 'tile', '');
       b.style.width = '100%'; b.style.marginBottom = '8px'; b.style.cursor = 'pointer';
       b.appendChild(el('div', '', c.title));
