@@ -224,8 +224,38 @@ function localize(payload, sys, content) {
   return payload;
 }
 
+
+// PubMed finto (le prove non escono in rete): due articoli, con titolo, rivista e abstract; e una scheda di studio finta per Claude.
+export function fakePubmed(url) {
+  const j = (o) => new Response(JSON.stringify(o), { status: 200, headers: { 'content-type': 'application/json' } });
+  if (/esearch/.test(url)) return j({ esearchresult: { idlist: ['111', '222'] } });
+  if (/esummary/.test(url)) {
+    return j({ result: { uids: ['111', '222'],
+      111: { uid: '111', title: 'Sacubitril/valsartan in heart failure: a pooled analysis.', source: 'Eur Heart J', pubdate: '2025 Jan 10', authors: [{ name: 'Rossi M' }, { name: 'Bianchi L' }, { name: 'Verdi G' }, { name: 'Neri A' }] },
+      222: { uid: '222', title: 'Catheter ablation versus drugs for atrial fibrillation.', source: 'J Am Coll Cardiol', pubdate: '2024 Nov', authors: [{ name: 'Smith J' }] } } });
+  }
+  if (/efetch/.test(url)) {
+    return new Response('<PubmedArticleSet><PubmedArticle><MedlineCitation><Article><Journal><JournalIssue><PubDate><Year>2025</Year></PubDate></JournalIssue><Title>European Heart Journal</Title></Journal>'
+      + '<ArticleTitle>Sacubitril/valsartan in heart failure: a pooled analysis.</ArticleTitle><ELocationID EIdType="doi">10.1000/xyz</ELocationID>'
+      + '<Abstract><AbstractText Label="BACKGROUND">Heart failure with reduced ejection fraction carries a high mortality.</AbstractText>'
+      + '<AbstractText Label="RESULTS">The hazard ratio for the primary endpoint was 0.80 (95% confidence interval 0.70 to 0.91).</AbstractText></Abstract></Article></MedlineCitation></PubmedArticle></PubmedArticleSet>', { status: 200 });
+  }
+  return new Response('{}', { status: 404 });
+}
+export const FAKE_SHEET = {
+  summary: 'Analisi cumulativa di studi su scompenso con frazione di eiezione ridotta: riduzione dell\'endpoint primario.',
+  terms: Array.from({ length: 8 }, (_, i) => ({ term: 'term' + i, it: 'termine ' + i, def: 'a short definition', type: 'nome', example: 'An example sentence ' + i + '.', note: '' })),
+  patterns: [{ pattern: 'was associated with a reduced risk of ...', it: 'è stato associato a un ridotto rischio di ...', example: 'Treatment was associated with a reduced risk of death.' }],
+  questions: Array.from({ length: 4 }, (_, i) => ({ q: 'Question ' + i + '?', options: ['a', 'b', 'c', 'd'], answer: i % 4, why: 'perché' })),
+  cloze: Array.from({ length: 3 }, (_, i) => ({ q: 'The ___ was reduced ' + i + '.', answer: 'hazard ratio', why: 'termine' })),
+};
+
 export function fakeClaude(counter, opts = {}) {
   return async (url, init) => {
+    if (/eutils\.ncbi\.nlm\.nih\.gov/.test(String(url))) {
+      if (opts.realPubmed) { try { const r = await fetch(url, init); if (r.ok) return r; } catch {} }
+      return fakePubmed(String(url));
+    }
     counter.n++;
     const b = JSON.parse(init.body);
     const sys = b.system;
@@ -250,6 +280,7 @@ export function fakeClaude(counter, opts = {}) {
         { type: 'scelta', q: `Mi hermana ___ médica ${stamp}.`, options: ['es', 'está', 'hay', 'tiene'], answer: 0, why: 'ser' },
       ] };
     } else if (sys.includes('Valuta traduzioni')) payload = { results: JSON.parse(b.messages[0].content).map((x, i) => ({ ok: i === 0, score: i === 1 ? 0.7 : undefined, corrected: x.ref, note: 'nota' })) };
+    else if (sys.includes('scheda di studio')) payload = FAKE_SHEET;
     else if (sys.includes('forme coniugate del verbo')) {
       payload = { results: JSON.parse(b.messages[0].content).map((x) => ({ i: x.i, forms: fakeItalian(x.it, x.tenseIt, x.persons) })) };
     }

@@ -2,6 +2,7 @@
 //   import { run } from './backend.test.mjs'; console.log(await run());
 import { handle } from '../lib/router.mjs';
 import { MemoryBlobs } from '../lib/memory-blobs.mjs';
+import { fakePubmed, FAKE_SHEET } from './backend.test.mjs';
 import { setIterations } from '../lib/util.mjs';
 
 const SECRET = 'x'.repeat(40);
@@ -129,6 +130,7 @@ export function fakeItalian(gloss, tenseIt, persons) {
 
 export function fakeClaude(counter, opts = {}) {
   return async (url, init) => {
+    if (/eutils\.ncbi\.nlm\.nih\.gov/.test(String(url))) return fakePubmed(String(url));
     counter.n++;
     const b = JSON.parse(init.body);
     const sys = b.system;
@@ -153,6 +155,7 @@ export function fakeClaude(counter, opts = {}) {
         { type: 'scelta', q: `Mi hermana ___ médica ${stamp}.`, options: ['es', 'está', 'hay', 'tiene'], answer: 0, why: 'ser' },
       ] };
     } else if (sys.includes('Valuta traduzioni')) payload = { results: JSON.parse(b.messages[0].content).map((x, i) => ({ ok: i === 0, score: i === 1 ? 0.7 : undefined, corrected: x.ref, note: 'nota' })) };
+    else if (sys.includes('scheda di studio')) payload = FAKE_SHEET;
     else if (sys.includes('forme coniugate del verbo')) {
       payload = { results: JSON.parse(b.messages[0].content).map((x) => ({ i: x.i, forms: fakeItalian(x.it, x.tenseIt, x.persons) })) };
     }
@@ -229,7 +232,7 @@ export async function run({ iterations = 1000 } = {}) {
   // ---------------- sessione
   r = await call('GET', API, { cookie: jar.salvatore });
   ok(r.status === 200 && r.json.needsPlacement === true && r.json.profile.level === 'B1' && r.json.plan.length === 8, 'stato iniziale: serve il test di ingresso', JSON.stringify(r.json).slice(0, 200));
-  ok(r.json.me.user === 'salvatore' && r.json.me.role === 'admin' && r.json.grammar.length === 4 && r.json.themes.length === 28, 'stato: utente, grammatica, temi');
+  ok(r.json.me.user === 'salvatore' && r.json.me.role === 'admin' && r.json.grammar.length === 4 && r.json.themes.length === 34, 'stato: utente, grammatica, temi');
   const tampered = jar.salvatore.replace(/\.[^.;]+/, '.firmafalsa');
   r = await call('GET', API, { cookie: tampered });
   ok(r.status === 401, 'cookie manomesso: 401');
@@ -392,6 +395,24 @@ export async function run({ iterations = 1000 } = {}) {
   ok(r.status === 200 && r.json.stats.topErrors['lessico'] >= 1, 'record_exercise vocabolario: errori nella categoria lessico');
   r = await call('POST', API, { cookie: S, body: { action: 'deck', limit: 40 } });
   ok(r.json.total === 26 && r.json.dueTotal === 24 && r.json.boxes[1] === 2, 'mazzo: due parole promosse e rimandate', JSON.stringify(r.json.boxes) + ' ' + r.json.dueTotal);
+  // letteratura scientifica (PubMed finto)
+  r = await call('POST', API, { cookie: S, body: { action: 'lit_search', query: 'heart failure' } });
+  ok(r.status === 200 && r.json.items.length === 2 && r.json.items[0].pmid === '111' && /et al/.test(r.json.items[0].authors) && r.json.items[0].journal === 'Eur Heart J' && r.json.items[0].year === '2025', 'letteratura: ricerca su PubMed', JSON.stringify(r.json));
+  r = await call('POST', API, { cookie: S, body: { action: 'lit_search', query: 'ab' } });
+  ok(r.status === 400, 'letteratura: ricerca troppo corta rifiutata');
+  const nl = counter.n;
+  r = await call('POST', API, { cookie: S, body: { action: 'lit_read', pmid: '111' } });
+  ok(r.status === 200 && r.json.article.title.startsWith('Sacubitril') && r.json.article.doi === '10.1000/xyz' && r.json.sheet.terms.length === 8 && r.json.sheet.questions.length === 4 && r.json.sheet.cloze.length === 3 && counter.n === nl + 1 && counter.last.system.includes('scheda di studio') && counter.last.messages[0].content.includes('hazard ratio'), 'letteratura: scheda di studio dall\'abstract', JSON.stringify(r.json).slice(0, 200));
+  r = await call('POST', API, { cookie: S, body: { action: 'lit_read', pmid: '111' } });
+  ok(r.status === 200 && counter.n === nl + 1, 'letteratura: la scheda resta in cache (nessuna nuova chiamata a Claude)');
+  r = await call('POST', API, { cookie: S, body: { action: 'lit_read', pmid: 'abc' } });
+  ok(r.status === 400, 'letteratura: identificativo non valido rifiutato');
+  r = await call('POST', API, { cookie: S, body: { action: 'lit_deck_add', pmid: '111' } });
+  ok(r.status === 200 && r.json.added === 8, 'letteratura: i termini vanno nel mazzo');
+  r = await call('POST', API, { cookie: S, body: { action: 'chat', messages: [], mode: 'conversazione', scenario: 'journalclub', topic: '', pmid: '111' } });
+  ok(r.status === 200 && counter.last.system.includes('ARTICOLO DI RIFERIMENTO') && counter.last.system.includes('Sacubitril') && r.json.article.pmid === '111', 'journal club: la conversazione parte dall\'articolo scelto');
+  r = await call('POST', API, { cookie: S, body: { action: 'chat', messages: [], mode: 'conversazione', scenario: 'journalclub', topic: '' } });
+  ok(r.status === 200 && counter.last.system.includes('Nessun articolo è stato scelto') && !r.json.article, 'journal club: senza articolo il tutor chiede di sceglierne uno');
 
   r = await call('POST', API, { cookie: S, body: { action: 'test' } });
   ok(r.status === 200 && r.json.items.length === 20 && r.json.writing, 'test: 20 domande e una consegna');
@@ -439,6 +460,7 @@ export async function run({ iterations = 1000 } = {}) {
   ok(r.status === 200 && (await blobs.get('data/guest')) === null, 'guest eliminato con i suoi dati');
   r = await call('POST', '/api/auth/logout', { cookie: newCookie, body: {} });
   ok(r.status === 200 && /Max-Age=0/.test(r.cookie), 'logout: cookie azzerato');
+
 
   return { failures, total: results.length, results, claudeCalls: counter.n };
 }

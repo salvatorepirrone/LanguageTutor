@@ -32,6 +32,10 @@ export default {
   "congresso": {
    "label": "Presentazione a un congresso",
    "desc": "Gioco di ruolo: tu sei il presidente di sessione o un uditore a un congresso di cardiologia; lo studente presenta un caso o uno studio e risponde alle domande."
+  },
+  "journalclub": {
+   "label": "Journal club (articolo scientifico)",
+   "desc": "Gioco di ruolo: tu sei un collega con cui lo studente discute, come in un journal club, l'articolo di riferimento (titolo e abstract ti sono forniti): chiedi disegno dello studio, popolazione, endpoint, risultati, limiti e implicazioni cliniche, e fai usare i termini tecnici e le strutture tipiche degli articoli scientifici."
   }
  },
  "grammar": [
@@ -304,6 +308,36 @@ export default {
    "id": "abbreviazioni",
    "title": "Abbreviazioni, eponimi e radici greco-latine",
    "hint": "sigle usate nella lingua, prefissi e suffissi, eponimi; esempi di termini da includere: IDM, FEVG, CAD, FA, PAC, -ite, -ectomie, -plastie"
+  },
+  {
+   "id": "disegni-studio",
+   "title": "Disegni di studio e metodi",
+   "hint": "trial randomizzato, coorte, caso-controllo, registro, cross-over, non inferiorità, intention-to-treat, cecità, randomizzazione, criteri di inclusione; esempi di termini da includere: essai randomisé contrôlé, étude de cohorte, étude cas-témoins, registre, essai croisé, non-infériorité, analyse en intention de traiter, insu, critères d'inclusion"
+  },
+  {
+   "id": "statistica-clinica",
+   "title": "Statistica e misure di effetto",
+   "hint": "hazard ratio, odds ratio, rischio relativo, riduzione del rischio assoluto, NNT, intervallo di confidenza, valore di p, Kaplan-Meier, sottogruppi, interazione; esempi di termini da includere: rapport de risques instantané, odds ratio, risque relatif, réduction absolue du risque, nombre de sujets à traiter, intervalle de confiance, valeur de p, courbe de Kaplan-Meier"
+  },
+  {
+   "id": "endpoint-esiti",
+   "title": "Endpoint ed esiti clinici",
+   "hint": "endpoint primario, MACE, mortalità per tutte le cause, ospedalizzazione per scompenso, endpoint composito, endpoint surrogato, follow-up, eventi avversi, sanguinamento maggiore; esempi di termini da includere: critère de jugement principal, événements cardiovasculaires majeurs, mortalité toutes causes, hospitalisation pour insuffisance cardiaque, critère composite, critère de substitution, événements indésirables"
+  },
+  {
+   "id": "linee-guida",
+   "title": "Linee guida e livelli di evidenza",
+   "hint": "classe di raccomandazione, livello di evidenza, formule delle raccomandazioni (è raccomandato, deve essere considerato, può essere considerato), consensus, opinione di esperti; esempi di termini da includere: classe de recommandation, niveau de preuve, est recommandé, doit être envisagé, peut être envisagé, consensus d'experts"
+  },
+  {
+   "id": "frasi-articoli",
+   "title": "Frasi e collocazioni degli articoli scientifici",
+   "hint": "formule tipiche di abstract e discussione: associazione, differenza non significativa, aggiustamento, limiti dello studio, implicazioni cliniche; ogni voce è un'espressione completa; esempi di termini da includere: a été associé à, n'a pas différé de façon significative, après ajustement sur, ces résultats suggèrent, l'étude manquait de puissance, parmi les limites, dans une analyse poolée"
+  },
+  {
+   "id": "trial-storici",
+   "title": "Studi e acronimi noti in cardiologia",
+   "hint": "acronimi di trial e registri noti, ciascuno con l'ambito e la domanda clinica a cui rispondeva (senza cifre dei risultati); includi anche le sigle di punteggi e classificazioni usate negli articoli; esempi di termini da includere: PARADIGM-HF, DAPA-HF, SPRINT, FOURIER, ISCHEMIA, score GRACE, score CHA2DS2-VASc"
   }
  ],
  "writingPrompts": [
@@ -346,7 +380,12 @@ export default {
   "la ricerca clinica e i trial",
   "i dispositivi indossabili e la salute del cuore",
   "l'attesa per gli esami e le liste d'attesa",
-  "un paziente che non dimenticherai"
+  "un paziente che non dimenticherai",
+  "un articolo recente che ha cambiato la tua pratica",
+  "come leggi un articolo scientifico: da dove cominci?",
+  "i trial che hanno cambiato le linee guida",
+  "quando fidarsi di uno studio osservazionale",
+  "il ruolo delle riviste e della revisione tra pari"
  ],
  "contexts": [
   "in pronto soccorso",
@@ -386,7 +425,11 @@ export default {
   "chiedi l'interpretazione di un reperto (ECG, eco, esami di laboratorio)",
   "chiedi come comunicherebbe una cattiva notizia a un paziente",
   "chiedi cosa cambierebbe nell'organizzazione del reparto",
-  "chiedi di commentare il risultato di uno studio"
+  "chiedi di commentare il risultato di uno studio",
+  "chiedi di riassumere in due frasi l'articolo di cui parlate, come lo direbbe a un congresso",
+  "chiedi quali limiti dello studio contano di più e come li esprimerebbe in un abstract",
+  "chiedi di rendere un risultato statistico (hazard ratio, intervallo di confidenza) in una frase per il paziente",
+  "chiedi la differenza tra un risultato statisticamente significativo e clinicamente rilevante"
  ],
  "twists": {
   "anamnesi": [
@@ -444,6 +487,14 @@ export default {
    "una domanda sui limiti dello studio",
    "il presidente chiede le implicazioni cliniche",
    "una domanda sul follow-up"
+  ],
+  "journalclub": [
+   "l'endpoint primario è composito e un componente pesa più degli altri",
+   "il follow-up è breve per trarre conclusioni",
+   "la popolazione è selezionata e poco generalizzabile",
+   "il risultato è significativo ma l'effetto assoluto è piccolo",
+   "c'è un'analisi di sottogruppo da interpretare con cautela",
+   "il commento riguarda il conflitto di interessi e la validità esterna"
   ]
  },
  "levels": [

@@ -25,8 +25,8 @@ In ogni pagina dopo l'accesso c'è il pulsante **💬 Feedback**: le segnalazion
 Due versioni delle app pensate per medici, cardiologi in particolare, con l'obiettivo di **fornire e rafforzare la terminologia tecnica**. Hanno le stesse sezioni delle altre lingue, ma:
 
 - **Livelli** B1, B1+, B2 e C1 (il test d'ingresso e la scelta del livello usano solo questi).
-- **Vocabolario**: 28 temi di terminologia medica (anatomia, sintomi, anamnesi, esame obiettivo, ECG, imaging, laboratorio, cardiopatia ischemica, scompenso, aritmie, valvulopatie,
-  farmaci e anticoagulanti, procedure e dispositivi, emergenza, comunicazione con il paziente, ricerca e scrittura scientifica, abbreviazioni e radici greco-latine…), con test di scrittura,
+- **Vocabolario**: 34 temi di terminologia medica (anatomia, sintomi, anamnesi, esame obiettivo, ECG, imaging, laboratorio, cardiopatia ischemica, scompenso, aritmie, valvulopatie,
+  farmaci e anticoagulanti, procedure e dispositivi, emergenza, comunicazione con il paziente, ricerca e scrittura scientifica, disegni di studio, statistica ed endpoint, linee guida e livelli di evidenza, frasi e collocazioni degli articoli, acronimi dei trial noti, abbreviazioni e radici greco-latine…), con test di scrittura,
   sinonimi, abbreviazioni e, quando c'è, il termine per il paziente. Le parole finiscono nel mazzo con ripasso a intervalli.
 - **Conversazione**: otto scenari clinici (anamnesi con un paziente, visita di controllo, giro visite e consegne, consulto tra specialisti, consenso informato, emergenza, presentazione a un congresso,
   chiacchierata tra colleghi) e tutor che sono colleghi (cardiologa, specializzando, infermiera specializzata, professore); il tutor corregge i termini imprecisi (categoria «terminologia»)
@@ -35,6 +35,13 @@ Due versioni delle app pensate per medici, cardiologi in particolare, con l'obie
 - **Grammatica**: argomenti del linguaggio medico (anamnesi, descrizione dei sintomi, spiegare al paziente, rischi e probabilità, cattive notizie, case report, lettera di dimissione, SOAP e SBAR, risultati degli studi,
   prudenza scientifica, radici greco-latine, abbreviazioni, falsi amici, misure e unità).
 - **Verbi**: lo stesso motore dell'inglese o del francese, con in più i verbi clinici (to auscultate, to prescribe, ausculter, prescrire…).
+
+- **Letteratura** (sezione 📰): articoli **reali** e recenti (ultimi tre anni, con abstract, in inglese) cercati su PubMed per argomento o con una ricerca libera. Per ogni articolo Claude prepara una *scheda di studio*:
+  riassunto in italiano, 8-12 termini tecnici come si usano davvero (nel francese con l'equivalente francese e, nella nota, il termine inglese originale), strutture tipiche degli abstract, domande di comprensione
+  ed esercizi sul termine chiave; i termini si aggiungono al mazzo di ripasso. L'abstract non viene riprodotto: si mostrano titolo, rivista, anno e il collegamento a PubMed, e la scheda si salva per non ripetere la richiesta.
+- **Journal club**: dalla scheda si passa a una conversazione in cui il tutor, come un collega, discute con te l'articolo (disegno, popolazione, endpoint, risultati, limiti, implicazioni cliniche) e ti fa usare la sua terminologia.
+
+La ricerca usa l'interfaccia pubblica E-utilities di PubMed (senza chiave, con un limite di richieste al secondo: i risultati si conservano 24 ore). Il sito deve poter fare richieste in uscita a `eutils.ncbi.nlm.nih.gov`.
 
 I contenuti sono generati da Claude e **non sono rivisti da un medico madrelingua**: la terminologia va verificata prima di fidarsi di un termine dubbio.
 
@@ -153,7 +160,7 @@ const m = await import('/netlify/test/backend.test.mjs');   // spagnolo; poi pt,
 console.log(await m.run());                                  // { failures: 0, total: 121, ... }
 ```
 
-Spagnolo 121 prove, portoghese 97, inglese 103, francese 103, inglese e francese per medici 103 ciascuno, adattatore Redis (`redis.test.mjs`) 122. Dopo aver modificato un file, ricarica la pagina (il browser tiene i moduli in cache).
+Spagnolo 121 prove, portoghese 97, inglese 103, francese 103, inglese e francese per medici 111 ciascuno, adattatore Redis (`redis.test.mjs`) 122. Dopo aver modificato un file, ricarica la pagina (il browser tiene i moduli in cache).
 
 ## Aggiungere una lingua
 

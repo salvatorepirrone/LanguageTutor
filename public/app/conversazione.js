@@ -167,7 +167,7 @@
     if (text) { history.push({ role: 'user', text: text }); addMsg('user', text); ui.box.value = ''; ui.box.style.height = ''; boxFromVoice = false; committed = ''; }
     busy = true; ui.send.disabled = true;
     var wait = el('div', 'sys', '…'); ui.log.appendChild(wait); scrollDown();
-    SP.call({ action: 'chat', messages: history, mode: ui.mode.value, scenario: ui.scenario.value, voice: voice, topic: topic, persona: persona })
+    SP.call({ action: 'chat', messages: history, mode: ui.mode.value, scenario: ui.scenario.value, voice: voice, topic: topic, persona: persona, pmid: ui.scenario.value === 'journalclub' ? (SP.pref('pmid') || '') : '' })
       .then(function (r) {
         wait.remove();
         if (!topic && r.topic) {
@@ -178,6 +178,7 @@
           persona = r.persona;
           note('Con chi parli: ' + persona.name + (persona.role ? ' — ' + persona.role : ''), 'sys');
         }
+        if (r.article && !history.length) note('Articolo: ' + r.article.title + ' (' + r.article.journal + ', ' + r.article.year + ')', 'sys');
         if (text) addFeedback(r);
         history.push({ role: 'assistant', text: r.reply });
         addMsg('tutor', r.reply);
