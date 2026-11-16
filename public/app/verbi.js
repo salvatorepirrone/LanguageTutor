@@ -170,6 +170,7 @@
     gp.appendChild(document.createTextNode(' · ' + TUTOR.verbs.participleLabel + ': '));
     gp.appendChild(el('b', c.irrPart ? 'irr' : '', c.participio));
     head.appendChild(gp);
+    if (SPV.participleNote) head.appendChild(el('div', 'muted', SPV.participleNote(c.inf)));
     var row = el('div', 'row'); row.style.marginTop = '10px';
     var tr = el('button', 'primary', 'Allenati su ' + c.inf);
     tr.addEventListener('click', function () { setHash('allenati:' + c.inf); });
@@ -282,6 +283,7 @@
       if (seen[key]) continue;
       seen[key] = true;
       var person = (tk === 'impAfirmativo' || tk === 'impNegativo') ? SPV.IMP_PERSONS[i] : SPV.PERSONS[i];
+      if (c[tk][i] === '—') continue;   // forma che non esiste (per esempio l'imperativo di pouvoir)
       qs.push({ inf: v, it: c.it, tense: tenseName(t), tenseKey: tk, personIdx: i, person: person, answer: c[tk][i], irregular: c.irregular[tk][i], alts: SPV.alts ? SPV.alts(c[tk][i], tk, i) : [] });
     }
     return qs;

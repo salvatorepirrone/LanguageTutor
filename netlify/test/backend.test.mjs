@@ -127,6 +127,79 @@ export function fakeItalian(gloss, tenseIt, persons) {
   });
 }
 
+// Testi di prova nella lingua studiata, per la demo locale (opts.localized): senza, il tutor simulato risponderebbe sempre in spagnolo.
+const LOC = {
+  en: {
+    chat: { reply: 'Hello, how are you today?', sugg: 'I am twenty years old.', corr: { original: 'I have 20 years', corrected: 'I am 20 years old', note: 'In inglese l\'età si dice con be, non con have.', cat: 'tempi del passato' }, vocab: { es: 'the dinner', it: 'la cena' } },
+    hint: ['It is when people stop working to protest.', 'The word is "the strike".', 'the strike'], example: { es: 'I see him every day.', it: 'Lo vedo ogni giorno.' },
+    writing: { original: 'I have eaten yesterday', corrected: 'I ate yesterday', note: 'Con «ieri» si usa il past simple.', cat: 'tempi del passato', improved: 'Yesterday I ate pasta with my friends.' },
+    items: (s) => [
+      { type: 'completa', q: `Yesterday I ___ (go) to the market ${s}.`, answer: 'went', alts: [], why: 'Past simple irregolare.' },
+      { type: 'scelta', q: `She ___ a doctor ${s}.`, options: ['is', 'are', 'am', 'be'], answer: 0, why: 'Be alla terza persona.' },
+      { type: 'completa', q: `He ___ (have) breakfast at seven ${s}.`, answer: 'has', alts: [], why: 'Terza persona singolare.' },
+      { type: 'traduci', q: `Vado al mercato ${s}.`, ref: 'I go to the market.', why: 'Present simple.' },
+      { type: 'scelta', q: `We ___ at home ${s}.`, options: ['are', 'is', 'am', 'be'], answer: 0, why: 'Be con we.' },
+      { type: 'completa', q: `You ___ (be) late yesterday ${s}.`, answer: 'were', alts: [], why: 'Passato di be.' },
+      { type: 'scelta', q: `I ___ my keys ${s}.`, options: ['have lost', 'has lost', 'losted', 'am lose'], answer: 0, why: 'Present perfect.' },
+      { type: 'traduci', q: `Mangio una mela ${s}.`, ref: 'I eat an apple.', why: 'Present simple.' },
+      { type: 'completa', q: `Yesterday you ___ (go) to the bank, but it ___ (be) closed ${s}.`, answer: 'went / was', alts: [], why: 'Due passati.' },
+    ],
+    words: { cibo: 'the apple | la mela | | nome\nthe bread | il pane | | nome\nthe cheese | il formaggio | | nome\nthe milk | il latte | | nome\nthe egg | l\'uovo | | nome\nthe rice | il riso | | nome\nthe fish | il pesce | | nome\nto cook | cucinare | to prepare | verbo\nthe recipe | la ricetta | | nome\nthe bill | il conto | the check | nome',
+      casa: 'the house | la casa | the home | nome\nthe kitchen | la cucina | | nome\nthe bedroom | la camera da letto | | nome\nthe window | la finestra | | nome\nthe door | la porta | | nome\nthe stairs | le scale | | nome\nthe roof | il tetto | | nome\nto clean | pulire | to tidy | verbo\nthe neighbour | il vicino | | nome\nthe rent | l\'affitto | | nome',
+      generico: 'nice | bello, carino | lovely | aggettivo\nto buy | comprare | to purchase | verbo\nthe weather | il tempo | | nome\nearly | presto | | avverbio\nto remember | ricordare | | verbo\nthe meeting | la riunione | | nome\nto agree | essere d\'accordo | | verbo\nbusy | occupato | | aggettivo\nthe journey | il viaggio | the trip | nome\nto improve | migliorare | | verbo\nsometimes | a volte | | avverbio\nthe opinion | l\'opinione | | nome' },
+  },
+  fr: {
+    chat: { reply: 'Bonjour, comment ça va aujourd\'hui ?', sugg: 'J\'ai vingt ans.', corr: { original: 'je suis 20 ans', corrected: 'j\'ai 20 ans', note: 'In francese l\'età si dice con avoir.', cat: 'presente irregolare' }, vocab: { es: 'le dîner', it: 'la cena' } },
+    hint: ['C\'est quand on arrête de travailler pour protester.', 'Le mot est « la grève ».', 'la grève'], example: { es: 'Je le vois tous les jours.', it: 'Lo vedo ogni giorno.' },
+    writing: { original: 'j\'ai mangé hier soir pizza', corrected: 'j\'ai mangé une pizza hier soir', note: 'Serve l\'articolo.', cat: 'articoli e partitivi', improved: 'Hier soir, j\'ai mangé une pizza avec des amis.' },
+    items: (s) => [
+      { type: 'completa', q: `Hier, je ___ (aller) au marché ${s}.`, answer: 'suis allé', alts: ['suis allée'], why: 'Passé composé con être.' },
+      { type: 'scelta', q: `Nous ___ à la maison ${s}.`, options: ['sommes', 'êtes', 'suis', 'es'], answer: 0, why: 'Être con nous.' },
+      { type: 'completa', q: `Il ___ (avoir) faim ${s}.`, answer: 'a', alts: [], why: 'Avoir alla terza persona.' },
+      { type: 'traduci', q: `Vado al mercato ${s}.`, ref: 'Je vais au marché.', why: 'Aller al presente.' },
+      { type: 'scelta', q: `Elle ___ médecin ${s}.`, options: ['est', 'a', 'fait', 'va'], answer: 0, why: 'Être per la professione.' },
+      { type: 'completa', q: `Tu ___ (pouvoir) venir ${s}.`, answer: 'peux', alts: [], why: 'Pouvoir al presente.' },
+      { type: 'scelta', q: `J'___ mangé une pomme ${s}.`, options: ['ai', 'suis', 'as', 'a'], answer: 0, why: 'Avoir come ausiliare.' },
+      { type: 'traduci', q: `Mangio una mela ${s}.`, ref: 'Je mange une pomme.', why: 'Presente.' },
+      { type: 'completa', q: `Hier tu ___ (aller) à la banque, mais elle ___ (être) fermée ${s}.`, answer: 'es allé / était', alts: ['es allée / était'], why: 'Passé composé e imparfait.' },
+    ],
+    words: { cibo: 'la pomme | la mela | | nome\nle pain | il pane | | nome\nle fromage | il formaggio | | nome\nle lait | il latte | | nome\nl\'œuf | l\'uovo | | nome\nle riz | il riso | | nome\nle poisson | il pesce | | nome\ncuisiner | cucinare | préparer | verbo\nla recette | la ricetta | | nome\nl\'addition | il conto | la note | nome',
+      casa: 'la maison | la casa | le foyer | nome\nla cuisine | la cucina | | nome\nla chambre | la camera da letto | | nome\nla fenêtre | la finestra | | nome\nla porte | la porta | | nome\nl\'escalier | le scale | | nome\nle toit | il tetto | | nome\nnettoyer | pulire | ranger | verbo\nle voisin | il vicino | | nome\nle loyer | l\'affitto | | nome',
+      generico: 'joli | bello | beau | aggettivo\nacheter | comprare | | verbo\nle temps | il tempo | | nome\ntôt | presto | | avverbio\nse souvenir | ricordare | se rappeler | verbo\nla réunion | la riunione | | nome\nêtre d\'accord | essere d\'accordo | | verbo\noccupé | occupato | | aggettivo\nle voyage | il viaggio | le trajet | nome\naméliorer | migliorare | | verbo\nparfois | a volte | | avverbio\nl\'avis | l\'opinione | | nome' },
+  },
+  pt: {
+    chat: { reply: 'Olá, tudo bem?', sugg: 'Eu tenho vinte anos.', corr: { original: 'eu sou 20 anos', corrected: 'eu tenho 20 anos', note: 'L\'età si dice con ter.', cat: 'presente irregular' }, vocab: { es: 'o jantar', it: 'la cena' } },
+    hint: ['É quando as pessoas param de trabalhar para protestar.', 'A palavra é «a greve».', 'a greve'], example: { es: 'Eu o vejo todos os dias.', it: 'Lo vedo ogni giorno.' },
+    writing: { original: 'eu comi ontem pizza', corrected: 'eu comi pizza ontem', note: 'Ordine delle parole.', cat: 'ordine delle parole', improved: 'Ontem eu comi pizza com meus amigos.' },
+    items: (s) => [
+      { type: 'completa', q: `Ontem eu ___ (ir) ao mercado ${s}.`, answer: 'fui', alts: [], why: 'Pretérito perfeito di ir.' },
+      { type: 'scelta', q: `Nós ___ em casa ${s}.`, options: ['estamos', 'somos', 'estão', 'está'], answer: 0, why: 'Estar per la posizione.' },
+      { type: 'completa', q: `Ele ___ (ter) fome ${s}.`, answer: 'tem', alts: [], why: 'Ter al presente.' },
+      { type: 'traduci', q: `Vado al mercato ${s}.`, ref: 'Eu vou ao mercado.', why: 'Ir al presente.' },
+      { type: 'scelta', q: `Ela ___ médica ${s}.`, options: ['é', 'está', 'tem', 'faz'], answer: 0, why: 'Ser per la professione.' },
+      { type: 'completa', q: `Você ___ (poder) vir ${s}.`, answer: 'pode', alts: [], why: 'Poder al presente.' },
+      { type: 'scelta', q: `Eu ___ uma maçã ${s}.`, options: ['comi', 'comia', 'comerei', 'como'], answer: 0, why: 'Passato concluso.' },
+      { type: 'traduci', q: `Mangio una mela ${s}.`, ref: 'Eu como uma maçã.', why: 'Presente.' },
+      { type: 'completa', q: `Ontem você ___ (ir) ao banco, mas ___ (ser) feriado ${s}.`, answer: 'foi / era', alts: [], why: 'Perfeito e imperfeito.' },
+    ],
+    words: { cibo: 'a maçã | la mela | | nome\no pão | il pane | | nome\no queijo | il formaggio | | nome\no leite | il latte | | nome\no ovo | l\'uovo | | nome\no arroz | il riso | | nome\no peixe | il pesce | | nome\ncozinhar | cucinare | preparar | verbo\na receita | la ricetta | | nome\na conta | il conto | | nome',
+      casa: 'a casa | la casa | o lar | nome\na cozinha | la cucina | | nome\no quarto | la camera da letto | | nome\na janela | la finestra | | nome\na porta | la porta | | nome\na escada | le scale | | nome\no telhado | il tetto | | nome\nlimpar | pulire | arrumar | verbo\no vizinho | il vicino | | nome\no aluguel | l\'affitto | | nome',
+      generico: 'bonito | bello | lindo | aggettivo\ncomprar | comprare | | verbo\no tempo | il tempo | | nome\ncedo | presto | | avverbio\nlembrar | ricordare | recordar | verbo\na reunião | la riunione | | nome\nconcordar | essere d\'accordo | | verbo\nocupado | occupato | | aggettivo\na viagem | il viaggio | | nome\nmelhorar | migliorare | | verbo\nàs vezes | a volte | | avverbio\na opinião | l\'opinione | | nome' },
+  },
+};
+function demoLang(sys) { return /(insegnante|tutor) di inglese/.test(sys) ? 'en' : /(insegnante|tutor) di portoghese/.test(sys) ? 'pt' : /(insegnante|tutor) di francese/.test(sys) ? 'fr' : 'es'; }
+function localize(payload, sys, content) {
+  const lang = demoLang(sys), L = LOC[lang];
+  if (!L || !payload) return payload;
+  if (payload.reply !== undefined && payload.corrections) { payload.reply = L.chat.reply; payload.suggestion = L.chat.sugg; payload.corrections = [{ ...L.chat.corr }]; payload.vocab = [L.chat.vocab]; }
+  else if (payload.hint !== undefined) { payload.hint = /Livello richiesto: 2/.test(content) ? L.hint[1] : L.hint[0]; payload.word = L.hint[2]; }
+  else if (payload.blocks) payload.blocks[0].examples = [L.example];
+  else if (payload.items && payload.items[0] && payload.items[0].type !== 'scelta' || (payload.items && /Crea esercizi/.test(sys))) payload.items = L.items(Math.floor(Math.random() * 90) + 10);
+  else if (payload.words) { const key = /Casa/.test(content) ? 'casa' : /Cibo/.test(content) ? 'cibo' : 'generico'; payload.words = L.words[key].split('\n').map((row) => row.split('|').map((x) => x.trim())).map((p) => ({ es: p[0], it: p[1], syn: (p[2] || '').split(',').map((x) => x.trim()).filter(Boolean), ex: 'Example sentence with «' + p[0] + '».', exit: 'Frase d\'esempio.', type: p[3] || 'nome' })); }
+  else if (payload.corrections && payload.improved) { const w = L.writing; payload.corrections = [{ original: w.original, corrected: w.corrected, note: w.note, cat: w.cat }]; payload.improved = w.improved; }
+  return payload;
+}
+
 export function fakeClaude(counter, opts = {}) {
   return async (url, init) => {
     counter.n++;
@@ -170,6 +243,7 @@ export function fakeClaude(counter, opts = {}) {
       payload = { items: Array.from({ length: 20 }, (_, i) => ({ type: 'scelta', section: secs[Math.floor(i / 5)], level: ['A2', 'B1', 'B2'][i % 3], q: `Domanda test numero ${i} ${counter.n}`, text: i >= 15 ? 'Testo breve.' : undefined, options: ['a', 'b', 'c', 'd'], answer: i % 4, why: 'perché' })) };
     } else if (sys.includes('Valuta un breve testo')) payload = { level: 'B1', score: 7.4, comment: 'Bene.', corrections: [{ original: 'he comido', corrected: 'comí', note: 'ayer', cat: 'tempi del passato' }], improved: 'Texto mejorado.' };
     else payload = { reply: 'boh' };
+    if (opts.localized) payload = localize(payload, sys, b.messages[0] ? b.messages[0].content : '');
     return new Response(JSON.stringify({ content: [{ type: 'text', text: JSON.stringify(payload) }] }), { status: 200, headers: { 'content-type': 'application/json' } });
   };
 }

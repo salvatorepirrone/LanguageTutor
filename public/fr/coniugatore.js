@@ -55,7 +55,7 @@ var SPV = (function () {
         b.ger = b.impA + 'ant';
         b.imper = imperOf(b.p);
       }
-      ['f', 'pp', 'ger', 'sf', 'imper', 'aux'].forEach(function (k) {
+      ['f', 'pp', 'ger', 'sf', 'imper', 'aux', 'noimp'].forEach(function (k) {
         if (irr[k] !== undefined) b[k === 'f' ? 'fut' : k] = irr[k];
       });
       if (irr.ia === undefined && irr.i !== undefined && !irr.p) { b.impS = irr.i; b.impA = irr.i; }
@@ -82,8 +82,9 @@ var SPV = (function () {
     out.futur = each(function (p) { return b.fut + ['ai', 'as', 'a', 'ons', 'ez', 'ont'][p]; });
     out.conditionnel = each(function (p) { return b.fut + ['ais', 'ais', 'ait', 'ions', 'iez', 'aient'][p]; });
     out.subjonctif = b.sf ? b.sf.slice() : each(function (p) { return p === 3 ? b.sn + 'ions' : p === 4 ? b.sn + 'iez' : b.sj + ['e', 'es', 'e', '', '', 'ent'][p]; });
-    out.impAfirmativo = b.imper.slice();
-    out.impNegativo = b.imper.map(function (x) { return 'ne ' + x + ' pas'; });
+    out.impAfirmativo = b.noimp ? ['—', '—', '—'] : b.imper.slice();   // «—»: verbo senza imperativo (pouvoir, devoir, valoir)
+    out.impNegativo = b.noimp ? ['—', '—', '—'] : b.imper.map(function (x) { return 'ne ' + x + ' pas'; });
+    out.ppBase = b.pp;
     out.gerundio = b.ger;                                        // participe présent
     out.participio = b.aux === 'etre' ? b.pp + '(e)(s)' : b.pp;  // participe passé
     out.auxEtre = b.aux === 'etre';
@@ -125,11 +126,11 @@ var SPV = (function () {
   irr('aller', 'andare', { p: ['vais', 'vas', 'va', 'allons', 'allez', 'vont'], pp: 'allé', f: 'ir', i: 'all', sf: ['aille', 'ailles', 'aille', 'allions', 'alliez', 'aillent'], aux: 'etre', imper: ['va', 'allons', 'allez'] });
   irr('faire', 'fare', { p: ['fais', 'fais', 'fait', 'faisons', 'faites', 'font'], pp: 'fait', f: 'fer', sj: 'fass', sn: 'fass', imper: ['fais', 'faisons', 'faites'] });
   irr('dire', 'dire', { p: ['dis', 'dis', 'dit', 'disons', 'dites', 'disent'], pp: 'dit', f: 'dir', imper: ['dis', 'disons', 'dites'] });
-  irr('pouvoir', 'potere', { p: ['peux', 'peux', 'peut', 'pouvons', 'pouvez', 'peuvent'], pp: 'pu', f: 'pourr', sj: 'puiss', sn: 'puiss' });
+  irr('pouvoir', 'potere', { p: ['peux', 'peux', 'peut', 'pouvons', 'pouvez', 'peuvent'], pp: 'pu', f: 'pourr', sj: 'puiss', sn: 'puiss', noimp: true });
   irr('vouloir', 'volere', { p: ['veux', 'veux', 'veut', 'voulons', 'voulez', 'veulent'], pp: 'voulu', f: 'voudr', sj: 'veuill', sn: 'voul', imper: ['veuille', 'voulons', 'veuillez'] });
   irr('savoir', 'sapere', { p: ['sais', 'sais', 'sait', 'savons', 'savez', 'savent'], pp: 'su', f: 'saur', sj: 'sach', sn: 'sach', ger: 'sachant', imper: ['sache', 'sachons', 'sachez'] });
-  irr('devoir', 'dovere', { p: ['dois', 'dois', 'doit', 'devons', 'devez', 'doivent'], pp: 'dû', f: 'devr' });
-  irr('valoir', 'valere', { p: ['vaux', 'vaux', 'vaut', 'valons', 'valez', 'valent'], pp: 'valu', f: 'vaudr', sj: 'vaill', sn: 'val' });
+  irr('devoir', 'dovere', { p: ['dois', 'dois', 'doit', 'devons', 'devez', 'doivent'], pp: 'dû', f: 'devr', noimp: true });
+  irr('valoir', 'valere', { p: ['vaux', 'vaux', 'vaut', 'valons', 'valez', 'valent'], pp: 'valu', f: 'vaudr', sj: 'vaill', sn: 'val', noimp: true });
   irr('voir', 'vedere', { p: ['vois', 'vois', 'voit', 'voyons', 'voyez', 'voient'], pp: 'vu', f: 'verr' });
   irr('venir', 'venire', { p: ['viens', 'viens', 'vient', 'venons', 'venez', 'viennent'], pp: 'venu', f: 'viendr', aux: 'etre' });
   irr('tenir', 'tenere', { p: ['tiens', 'tiens', 'tient', 'tenons', 'tenez', 'tiennent'], pp: 'tenu', f: 'tiendr' });
@@ -178,7 +179,7 @@ var SPV = (function () {
     var b = V[baseInf], s = b.irr, k = strip || 0, out = {}, key;
     var pre = function (x) { return prefix + x.slice(k); };
     for (key in s) {
-      if (key === 'aux') out[key] = s[key];
+      if (key === 'aux' || typeof s[key] === 'boolean') out[key] = s[key];
       else if (key === 'p' || key === 'sf' || key === 'imper') out[key] = s[key].map(pre);
       else out[key] = pre(s[key]);
     }
@@ -245,7 +246,7 @@ var SPV = (function () {
   function full(inf) {
     var c = conj(inf, false), r = conj(inf, true), irregular = {};
     TENSES.forEach(function (t) {
-      irregular[t.key] = c[t.key].map(function (form, i) { return form !== r[t.key][i]; });
+      irregular[t.key] = c[t.key].map(function (form, i) { return form !== '—' && form !== r[t.key][i]; });
     });
     c.irregular = irregular;
     c.irrGer = c.gerundio !== r.gerundio;
@@ -284,6 +285,18 @@ var SPV = (function () {
   // Un infinito plausibile ha almeno una vocale prima della desinenza.
   function plausible(inf) { return /[aeiouyàâäéèêëîïôöùûüœ]/.test(inf.slice(0, -2)); }
 
+  // Le quattro forme del participio passato e come si accorda (la parte che nella tabella dei tempi non si vede).
+  function participleNote(inf) {
+    var c = conj(inf), pp = c.ppBase;
+    if (!pp) return '';
+    if (pp === 'été') return 'Participe passé: été (invariabile: non si accorda mai).';
+    var fs = pp === 'dû' ? 'due' : (/e$/.test(pp) ? pp : pp + 'e'), mp = /[sx]$/.test(pp) ? pp : pp + 's', fp = fs + 's';
+    var rule = c.auxEtre
+      ? 'Con être il participio si accorda con il soggetto (elle est allée, ils sont partis).'
+      : 'Con avoir si accorda solo con il complemento oggetto che lo precede (les lettres que j\'ai écrites; ma j\'ai écrit des lettres); con i verbi pronominali di solito si accorda con il soggetto (elles se sont lavées).';
+    return 'Participe passé: ' + pp + ' (m. sing.), ' + fs + ' (f. sing.), ' + mp + ' (m. plur.), ' + fp + ' (f. plur.). ' + rule;
+  }
+
   // Normalizza quello che l'utente scrive: minuscole, senza "se"/"s'" davanti (verbi pronominali); null se non sembra un infinito.
   function parse(text) {
     var t = String(text || '').trim().toLowerCase().normalize('NFC').replace(/’/g, '\'');
@@ -296,7 +309,7 @@ var SPV = (function () {
   }
 
   return {
-    PERSONS: PERSONS, IMP_PERSONS: IMP_PERSONS, TENSES: TENSES, verbs: V, full: full, conj: conj, parse: parse, suggest: suggest, plausible: plausible, alts: alts,
+    PERSONS: PERSONS, IMP_PERSONS: IMP_PERSONS, TENSES: TENSES, verbs: V, full: full, conj: conj, parse: parse, suggest: suggest, plausible: plausible, alts: alts, participleNote: participleNote,
     list: function () { return Object.keys(V).sort(); },
     irregularTop: ['être', 'avoir', 'aller', 'faire', 'dire', 'pouvoir', 'vouloir', 'savoir', 'devoir', 'venir', 'voir', 'prendre', 'mettre', 'partir', 'sortir', 'dormir', 'servir',
                    'tenir', 'boire', 'croire', 'recevoir', 'courir', 'mourir', 'naître', 'connaître', 'lire', 'écrire', 'vivre', 'suivre', 'rire', 'ouvrir', 'offrir', 'comprendre',
