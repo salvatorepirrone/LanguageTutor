@@ -78,6 +78,44 @@ var SP = (function () {
     sp.$('today').textContent = s.todayTurns;
   };
 
+  // ---- Prove superate: un argomento diventa «superato» (verde nella grammatica) con almeno 4 risposte e il 70% di giuste;
+  // una serie è superata con il 70% di giuste. Alla fine di una serie superata compare un messaggio di complimenti.
+  var PASS_RATIO = 0.7, PASS_MIN = 4;
+  sp.passed = function (p) { return !!p && p.done >= PASS_MIN && p.correct / p.done >= PASS_RATIO; };
+  sp.progressOf = function (topic) { return ((sp.stats && sp.stats.exProgress) || {})[topic]; };
+  function grammarTitle(id) {
+    var found = '';
+    ((sp.catalog && sp.catalog.grammar) || []).forEach(function (s) { s.topics.forEach(function (t) { if (t.id === id) found = t.title; }); });
+    return found;
+  }
+  function pick(list) { return list[Math.floor(Math.random() * list.length)]; }
+
+  // o = { correct, total, topic, before }: `before` dice se l'argomento era già superato prima di questa serie.
+  sp.celebrate = function (container, o) {
+    var total = o.total || 0, ratio = total ? o.correct / total : 0;
+    if (ratio < PASS_RATIO) return;
+    var num = String(Math.round(o.correct * 100) / 100).replace('.', ',');
+    var gTitle = grammarTitle(o.topic);
+    var what = gTitle ? 'la prova su «' + gTitle + '»' : o.topic === 'vocabolario' ? 'il test di vocabolario' : o.topic === 'coniugazione' ? 'l\'allenamento sui verbi' : 'questa serie di esercizi';
+    var box = sp.el('div', 'win');
+    box.appendChild(sp.el('div', 'trophy', ratio === 1 ? '🏆' : ratio >= 0.9 ? '🌟' : '🎉'));
+    var title = ratio === 1 ? pick(['Punteggio pieno, bravissimo!', 'Serie perfetta: ti è andata alla grande!'])
+      : ratio >= 0.9 ? pick(['Ottimo lavoro!', 'Risultato eccellente!'])
+      : pick(['Complimenti, hai superato questa prova!', 'Bravo, prova superata!']);
+    box.appendChild(sp.el('h3', '', title));
+    box.appendChild(sp.el('p', '', 'Hai superato ' + what + ' con ' + num + ' risposte giuste su ' + total + '. ' + pick(['Continua così!', 'La costanza fa la differenza.', 'Il tuo impegno si vede.', 'Ogni serie ti avvicina al tuo obiettivo.'])));
+    var now = sp.passed(sp.progressOf(o.topic));
+    if (gTitle && now && !o.before) {
+      box.appendChild(sp.el('p', 'big', '✅ L\'argomento «' + gTitle + '» ora è verde nella grammatica: l\'hai superato!'));
+      var go = sp.el('button', '', 'Vedi la grammatica');
+      go.addEventListener('click', function () { sp.go('grammatica'); });
+      box.appendChild(go);
+    } else if (gTitle && !now) {
+      box.appendChild(sp.el('p', 'muted', 'Per rendere verde l\'argomento nella grammatica servono almeno ' + PASS_MIN + ' risposte e il ' + Math.round(PASS_RATIO * 100) + '% di giuste: ancora una serie e ci sei.'));
+    }
+    container.insertBefore(box, container.firstChild);
+  };
+
   // Mostra un indicatore di attesa in un contenitore e restituisce una funzione per toglierlo.
   sp.loading = function (node, text) {
     var w = sp.el('div', 'card muted');

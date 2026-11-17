@@ -353,7 +353,8 @@
       again.addEventListener('click', function () { var v = SP.clear(SP.$('view')); SP.sections.verbi.mount(v, decodeURIComponent(location.hash.split('/')[2] || '')); });
       c.appendChild(again);
       box.appendChild(c);
-      SP.call({ action: 'record_exercise', topic: 'coniugazione', correct: correct, total: qs.length, errors: errors }).catch(function () {});
+      SP.call({ action: 'record_exercise', topic: 'coniugazione', correct: correct, total: qs.length, errors: errors })
+        .then(function () { SP.celebrate(c, { correct: correct, total: qs.length, topic: 'coniugazione', before: true }); }).catch(function () {});
     }
     next();
   }

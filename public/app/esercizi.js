@@ -188,7 +188,9 @@
           lessonBtn.addEventListener('click', function () { SP.go('grammatica', set.topic); });
           fin.appendChild(lessonBtn);
         }
-        SP.call({ action: 'record_exercise', topic: set.topic, correct: correct, total: items.length, errors: errors }).catch(function () {});
+        var before = SP.passed(SP.progressOf(set.topic));
+        SP.call({ action: 'record_exercise', topic: set.topic, correct: correct, total: items.length, errors: errors })
+          .then(function () { SP.celebrate(fin, { correct: correct, total: items.length, topic: set.topic, before: before }); }).catch(function () {});
       };
       if (!pend.length) { go({}); return; }
       var stop = SP.loading(fin, 'Il tutor corregge le traduzioni…');

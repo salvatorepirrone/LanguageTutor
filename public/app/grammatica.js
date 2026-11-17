@@ -30,8 +30,9 @@
         a.href = '#/grammatica/' + encodeURIComponent(t.id);
         var p = prog[t.id];
         if (p && p.done) {
-          a.classList.add('done');
-          a.appendChild(el('div', 'sub', 'Esercizi: ' + p.correct + '/' + p.done + ' giuste'));
+          var ok = SP.passed(p);
+          a.classList.add(ok ? 'done' : 'tried');   // verde solo se superato (almeno 4 risposte e 70% di giuste)
+          a.appendChild(el('div', 'sub', (ok ? '✓ Superato · ' : 'Esercizi: ') + (Math.round(p.correct * 100) / 100) + '/' + p.done + ' giuste'));
         }
         g.appendChild(a);
       });

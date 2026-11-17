@@ -219,7 +219,8 @@
       // salvataggi: mazzo (solo per il test del mazzo) e attività
       if (opts.deck) SP.call({ action: 'deck_review_many', items: results.map(function (r) { return { es: r.card.es, known: r.ok }; }) }).catch(function () {});
       SP.call({ action: 'record_exercise', topic: 'vocabolario', correct: correct, total: cards.length,
-        errors: wrong.map(function (r) { return { orig: r.given || '(nessuna risposta)', corr: r.card.es, note: r.card.it }; }) }).catch(function () {});
+        errors: wrong.map(function (r) { return { orig: r.given || '(nessuna risposta)', corr: r.card.es, note: r.card.it }; }) })
+        .then(function () { SP.celebrate(c, { correct: correct, total: cards.length, topic: 'vocabolario', before: true }); }).catch(function () {});
     }
 
     ask();
