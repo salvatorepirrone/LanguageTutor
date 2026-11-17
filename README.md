@@ -119,7 +119,7 @@ al posto dei Blobs di Netlify si usa **Redis di Upstash** (adattatore `netlify/l
 3. In *Settings → Environment Variables* aggiungi `ANTHROPIC_API_KEY`, `SESSION_SECRET` (almeno 32 caratteri), `SETUP_TOKEN` e, meglio, `PUBLIC_URL` (l'indirizzo del sito, per i link di invito).
 4. Fai il deploy, poi apri `https://<progetto>.vercel.app/setup.html` con il `SETUP_TOKEN` per creare l'amministratore.
 
-Differenze rispetto a Netlify: l'archivio è un altro (i dati non si condividono con un sito Netlify), lo strumento *Importa dai vecchi siti* non è disponibile (legge solo archivi Netlify),
+Differenze rispetto a Netlify: l'archivio è un altro (i dati non si condividono con un sito Netlify)
 e la durata massima delle funzioni è impostata a 120 secondi in `vercel.json` (controlla i limiti del tuo piano). Le prove dell'adattatore sono in `netlify/test/redis.test.mjs`.
 
 ## Accessi
@@ -130,37 +130,16 @@ e la durata massima delle funzioni è impostata a 120 secondi in `vercel.json` (
 - Cookie di sessione firmato (HttpOnly, Secure, SameSite=Lax); le richieste che modificano dati richiedono un'intestazione che un altro sito non può aggiungere.
 - Eliminando un utente si cancellano anche i suoi dati in tutte le lingue.
 
-## Importare utenti e dati dai vecchi siti
-
-Per portare in Language Tutor gli utenti (con le loro password), i ruoli, i limiti e i progressi dei siti di spagnolo e portoghese c'è uno strumento
-per l'amministratore in fondo a `/admin.html`. Non sovrascrive niente: chi esiste già e i dati già presenti restano come sono; gli inviti mai accettati
-vanno rifatti. I dati di studio dello spagnolo diventano quelli dello spagnolo, quelli del portoghese quelli del portoghese; l'inglese parte da zero.
-
-Per attivarlo servono queste variabili d'ambiente sul sito nuovo (ambito Functions) e un nuovo deploy; **non scriverle in chat né nel repository**:
-
-| Variabile | Valore |
-| --- | --- |
-| `LEGACY_TOKEN` | un token personale di Netlify (*User settings → Applications → Personal access tokens → New access token*) |
-| `LEGACY_ES_SITE_ID` | id del vecchio progetto dello spagnolo (`hablaespanol`): `4646ad19-77f5-4f73-a816-f4cecd3e159a` |
-| `LEGACY_PT_SITE_ID` | id del vecchio progetto del portoghese (`hablaportoguese`): `a1e27e46-b1a7-400d-b997-eba86c30e25b` |
-| `LEGACY_ES_STORE`, `LEGACY_PT_STORE` | (facoltative) nome dell'archivio vecchio; di solito `spagnolo` e `portugues` |
-
-Gli utenti con lo stesso nome che esistono già nel nuovo sito (per esempio il tuo) non vengono toccati. Per sostituirli con la versione del vecchio sito (password e progressi di quella lingua)
-fai prima l'**Anteprima**, spunta il loro nome sotto il riquadro del risultato e premi **Copia**: il ruolo di amministratore non si abbassa mai, ma chi viene sostituito deve accedere di nuovo con la vecchia password.
-
-Poi, da `/admin.html`: **Anteprima** (mostra cosa verrebbe copiato, senza copiare) e **Copia**. Si può ripetere senza rischi. A import finito si possono togliere le variabili `LEGACY_*`
-e il token.
-
 ## Prove
 
 Le prove si eseguono nel browser servendo il repository (la demo lo fa), da una pagina qualsiasi:
 
 ```js
 const m = await import('/netlify/test/backend.test.mjs');   // spagnolo; poi pt, en, fr, enmed e frmed (…test.mjs)
-console.log(await m.run());                                  // { failures: 0, total: 121, ... }
+console.log(await m.run());                                  // { failures: 0, total: 103, ... }
 ```
 
-Spagnolo 121 prove, portoghese 97, inglese 103, francese 103, inglese e francese per medici 111 ciascuno, adattatore Redis (`redis.test.mjs`) 122. Dopo aver modificato un file, ricarica la pagina (il browser tiene i moduli in cache).
+Spagnolo 103 prove, portoghese 97, inglese 103, francese 103, inglese e francese per medici 111 ciascuno, adattatore Redis (`redis.test.mjs`) 104. Dopo aver modificato un file, ricarica la pagina (il browser tiene i moduli in cache).
 
 ## Aggiungere una lingua
 

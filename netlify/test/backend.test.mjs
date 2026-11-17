@@ -316,12 +316,12 @@ export async function run({ iterations = 1000, blobs: givenBlobs } = {}) {
   const fetchImpl = fakeClaude(counter);
   let lastCookie = null;
   const jar = {};   // nome utente -> cookie
-  const call = async (method, path, { body, cookie, noHeader, ip = '1.2.3.4', env = ENV, legacy } = {}) => {
+  const call = async (method, path, { body, cookie, noHeader, ip = '1.2.3.4', env = ENV } = {}) => {
     const headers = { 'content-type': 'application/json' };
     if (!noHeader && method !== 'GET') headers['x-requested-with'] = 'tutor';
     lastCookie = null;
     const res = await handle(new Request('https://esempio.netlify.app' + path, { method, headers, body: body ? JSON.stringify(body) : undefined }),
-      { blobs, env, ip, legacy, fetch: fetchImpl, cookie: cookie ? cookie.split(';')[0] : '', onSetCookie: (c) => { lastCookie = c; } });
+      { blobs, env, ip, fetch: fetchImpl, cookie: cookie ? cookie.split(';')[0] : '', onSetCookie: (c) => { lastCookie = c; } });
     const text = await res.text();
     let json = null; try { json = JSON.parse(text); } catch {}
     return { status: res.status, json, cookie: lastCookie };
@@ -406,57 +406,6 @@ export async function run({ iterations = 1000, blobs: givenBlobs } = {}) {
   ok(r.status === 200 && r.json.items[0].status === 'fatto', 'feedback: segnato come gestito');
   r = await call('POST', '/api/admin/feedback', { cookie: jar.guest, body: { id: 'x', status: 'fatto' } });
   ok(r.status === 403, 'feedback: solo l\'amministratore cambia lo stato');
-  // importazione dai vecchi siti: archivi finti con due utenti (uno già presente nel nuovo sito), un invito mai accettato, dati e una lezione
-  const old = new MemoryBlobs();
-  const oldHash = (await (await import('../lib/util.mjs')).hashPassword('Vecchia-Password-1357y', 1000));
-  await old.setJSON('users', { salvatore: { hash: oldHash, role: 'admin' }, maria: { hash: oldHash, role: 'user', limit: 77 }, atteso: { pending: true, role: 'user' } });
-  await old.setJSON('data/maria', { days: { '2026-10-01': 3 }, errors: [], vocab: [], deck: {}, ex: {}, tests: [], profile: { level: 'B1', placed: true } });
-  await old.setJSON('data/salvatore', { days: { '2026-10-02': 1 } });
-  await old.setJSON('cache/grammar-articoli', { summary: 'lezione vecchia' });
-  const legacy = { es: () => old, pt: () => old };
-  r = await call('GET', '/api/admin/import', { cookie: jar.guest, legacy });
-  ok(r.status === 403, 'importazione: solo per gli amministratori');
-  r = await call('GET', '/api/admin/import', { cookie: jar.salvatore, legacy });
-  ok(r.status === 200 && r.json.sources.length === 2, 'importazione: elenco delle origini configurate', JSON.stringify(r.json));
-  r = await call('GET', '/api/admin/import', { cookie: jar.salvatore });
-  ok(r.status === 200 && r.json.sources.length === 0, 'importazione: senza variabili nessuna origine');
-  r = await call('POST', '/api/admin/import', { cookie: jar.salvatore, body: { source: 'es' } });
-  ok(r.status === 400, 'importazione: origine non configurata rifiutata');
-  r = await call('POST', '/api/admin/import', { cookie: jar.salvatore, legacy, body: { source: 'es', dry: true } });
-  ok(r.status === 200 && r.json.dry && r.json.users.copied.join() === 'maria' && r.json.users.existing.join() === 'salvatore' && r.json.users.pending.join() === 'atteso', 'importazione: anteprima senza copiare', JSON.stringify(r.json));
-  r = await call('GET', '/api/admin/users', { cookie: jar.salvatore });
-  ok(!r.json.users.some((u) => u.user === 'maria'), 'importazione: l\'anteprima non ha creato utenti');
-  r = await call('POST', '/api/admin/import', { cookie: jar.salvatore, legacy, body: { source: 'es' } });
-  ok(r.status === 200 && !r.json.dry && r.json.data.copied.sort().join() === 'maria,salvatore' && r.json.cache.copied === 1, 'importazione: copia di utenti, dati e lezioni', JSON.stringify(r.json));
-  r = await call('POST', '/api/admin/import', { cookie: jar.salvatore, legacy, body: { source: 'es' } });
-  ok(r.status === 200 && r.json.users.copied.length === 0 && r.json.data.copied.length === 0 && r.json.cache.copied === 0, 'importazione: ripetuta non copia niente di nuovo', JSON.stringify(r.json));
-  r = await call('POST', '/api/admin/import', { cookie: jar.salvatore, legacy, body: { source: 'pt' } });
-  ok(r.status === 200 && r.json.data.copied.sort().join() === 'maria,salvatore', 'importazione: il portoghese va sotto il suo prefisso', JSON.stringify(r.json));
-  r = await call('POST', '/api/auth/login', { body: { username: 'maria', password: 'Vecchia-Password-1357y' }, ip: '5.5.5.5' });
-  ok(r.status === 200 && r.cookie, 'importazione: la vecchia password funziona nel nuovo sito');
-  jar.maria = r.cookie;
-  r = await call('GET', '/api/es', { cookie: jar.maria });
-  ok(r.status === 200 && r.json.profile.level === 'B1' && r.json.needsPlacement === false && r.json.me.limit === 77, 'importazione: livello e limite dello spagnolo ritrovati', JSON.stringify(r.json.profile));
-  r = await call('GET', '/api/pt', { cookie: jar.maria });
-  ok(r.status === 200 && r.json.profile.level === 'B1', 'importazione: stesso utente anche nel portoghese');
-  r = await call('GET', '/api/en', { cookie: jar.maria });
-  ok(r.status === 200 && r.json.needsPlacement === true, 'importazione: l\'inglese parte da zero con il test di ingresso');
-  // sostituzione di un utente già presente: password, limite e dati dal vecchio sito; l'amministratore non perde il ruolo
-  await old.setJSON('users', { salvatore: { hash: oldHash, role: 'user', limit: 11 }, maria: { hash: oldHash, role: 'user', limit: 55 } });
-  await old.setJSON('data/maria', { days: { '2026-10-09': 7 }, errors: [], vocab: [], deck: {}, ex: {}, tests: [], profile: { level: 'B2', placed: true } });
-  r = await call('POST', '/api/admin/import', { cookie: jar.salvatore, legacy, body: { source: 'es', dry: true, replace: ['maria'] } });
-  ok(r.status === 200 && r.json.users.replaced.join() === 'maria' && r.json.users.existing.join() === 'salvatore', 'importazione: l\'anteprima indica chi verrebbe sostituito', JSON.stringify(r.json.users));
-  r = await call('POST', '/api/admin/import', { cookie: jar.salvatore, legacy, body: { source: 'es' } });
-  ok(r.status === 200 && r.json.users.replaced.length === 0 && r.json.users.existing.sort().join() === 'maria,salvatore', 'importazione: senza richiesta esplicita nessun utente viene sostituito');
-  r = await call('POST', '/api/admin/import', { cookie: jar.salvatore, legacy, body: { source: 'es', replace: ['maria'] } });
-  ok(r.status === 200 && r.json.users.replaced.join() === 'maria' && r.json.data.copied.join() === 'maria (sostituiti)', 'importazione: utente sostituito con dati e password del vecchio sito', JSON.stringify(r.json));
-  r = await call('GET', API, { cookie: jar.maria });
-  ok(r.status === 200 && r.json.profile.level === 'B2' && r.json.me.limit === 55, 'importazione: dopo la sostituzione valgono livello e limite del vecchio sito', JSON.stringify(r.json.profile));
-  r = await call('POST', '/api/admin/users', { cookie: jar.salvatore, body: { do: 'role', user: 'maria', role: 'admin' } });
-  r = await call('POST', '/api/admin/import', { cookie: jar.salvatore, legacy, body: { source: 'es', replace: ['maria'] } });
-  r = await call('GET', '/api/admin/users', { cookie: jar.salvatore });
-  ok(r.status === 200 && r.json.users.some((u) => u.user === 'maria' && u.role === 'admin'), 'importazione: il ruolo di amministratore non si abbassa nella sostituzione');
-  r = await call('POST', '/api/admin/users', { cookie: jar.salvatore, body: { do: 'role', user: 'maria', role: 'user' } });
   r = await call('POST', '/api/admin/users', { cookie: jar.salvatore, body: { do: 'role', user: 'salvatore', role: 'user' } });
   ok(r.status === 409, 'deve restare un admin');
   r = await call('POST', '/api/admin/users', { cookie: jar.salvatore, body: { do: 'limit', user: 'guest', limit: 2 } });
