@@ -81,6 +81,15 @@
       q.appendChild(el('div', 'muted', (i + 1) + '/' + items.length));
       q.appendChild(el('div', 'stem', it.q));
       var verdict = el('div');
+      var rep = el('button', 'link-small', '⚑ Segnala domanda sbagliata'); rep.type = 'button';
+      rep.style.cssText = 'float:right;font-size:.75rem;padding:2px 8px;margin:-26px 0 0 8px;background:none;border:none;color:var(--muted,#888);cursor:pointer;text-decoration:underline';
+      rep.addEventListener('click', function () {
+        if (!window.spReport) return;
+        rep.disabled = true; rep.textContent = 'Invio…';
+        window.spReport('[' + TUTOR.name + ' · ' + (set.label || set.topic) + ' · ' + it.type + (it.level ? ' · ' + it.level : '') + '] ' + it.q + ' | risposta attesa: ' + (it.type === 'scelta' ? it.options[it.answer] : it.type === 'completa' ? it.answer : it.ref) + (it.type === 'scelta' ? ' | opzioni: ' + it.options.join(' / ') : '') + (it.why ? ' | spiegazione: ' + it.why : ''))
+          .then(function () { rep.textContent = 'Segnalata, grazie'; }).catch(function () { rep.disabled = false; rep.textContent = '⚑ Riprova a segnalare'; });
+      });
+      q.appendChild(rep);
 
       if (it.type === 'scelta') {
         var btns = [];
@@ -163,7 +172,7 @@
       var pend = [];
       items.forEach(function (it, i) { if (it.type === 'traduci') pend.push(i); });
       var go = function (grades) {
-        var errors = [], correct = 0;
+        var errors = [], correct = 0, weights = [];
         items.forEach(function (it, i) {
           var st = states[i];
           if (it.type === 'traduci') {
@@ -175,6 +184,7 @@
             if (st.input) st.input.disabled = true;
           }
           correct += st.score !== undefined ? st.score : (st.ok ? 1 : 0);
+          weights.push({ w: SP.WEIGHT[it.level] || 2, s: st.score !== undefined ? st.score : (st.ok ? 1 : 0) });
           if (!st.ok) errors.push({ orig: st.given || '(vuota)', corr: it.type === 'scelta' ? it.options[it.answer] : it.type === 'completa' ? it.answer : (it.ref), note: it.why || it.q });
         });
         SP.clear(fin);
@@ -189,7 +199,7 @@
           fin.appendChild(lessonBtn);
         }
         var before = SP.passed(SP.progressOf(set.topic));
-        SP.call({ action: 'record_exercise', topic: set.topic, correct: correct, total: items.length, errors: errors })
+        SP.call({ action: 'record_exercise', topic: set.topic, correct: correct, total: items.length, errors: errors, weights: weights })
           .then(function () { SP.celebrate(fin, { correct: correct, total: items.length, topic: set.topic, before: before }); }).catch(function () {});
       };
       if (!pend.length) { go({}); return; }

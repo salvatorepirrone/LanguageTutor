@@ -350,6 +350,10 @@ export async function run({ iterations = 1000 } = {}) {
   ok(r.json.results[0].score === 1 && r.json.results[1].score === 0.75, 'grade: punteggio decimale a passi di 0,25 (0,7 → 0,75)', JSON.stringify(r.json.results));
   r = await call('POST', API, { cookie: S, body: { action: 'record_exercise', topic: 'mix', correct: 3.6, total: 4, errors: [] } });
   ok(r.status === 200 && r.json.stats.exProgress.mix.correct === 3.5, 'record_exercise: accetta punteggi decimali (3,6 → 3,5)', JSON.stringify(r.json.stats.exProgress));
+  r = await call('POST', API, { cookie: S, body: { action: 'record_exercise', topic: 'pesato', correct: 2, total: 4, weights: [{ w: 1, s: 1 }, { w: 1, s: 1 }, { w: 4, s: 0 }, { w: 4, s: 0 }], errors: [] } });
+  ok(r.status === 200 && r.json.stats.exProgress.pesato.wdone === 10 && r.json.stats.exProgress.pesato.wcorrect === 2 && r.json.stats.series.some((x) => x.topic === 'pesato' && x.wn === 10 && x.wc === 2), 'record_exercise: risposte pesate per difficoltà e serie storica', JSON.stringify(r.json.stats.exProgress.pesato));
+  r = await call('POST', API, { cookie: S, body: { action: 'record_exercise', topic: 'senzapesi', correct: 3, total: 4, errors: [] } });
+  ok(r.status === 200 && r.json.stats.exProgress.senzapesi.wdone === 4 && r.json.stats.exProgress.senzapesi.wcorrect === 3, 'record_exercise: senza pesi ogni risposta vale 1');
   r = await call('POST', API, { cookie: S, body: { action: 'record_exercise', topic: 'pron-oggetto', correct: 5, total: 8, errors: [{ orig: 'lo', corr: 'la', note: 'n' }] } });
   ok(r.status === 200 && r.json.stats.exProgress['pron-oggetto'].done === 8 && r.json.stats.topErrors['Pronomi e determinanti'] === 1, 'record_exercise: progressi e errore per sezione');
 

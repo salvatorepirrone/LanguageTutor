@@ -81,7 +81,10 @@ var SP = (function () {
   // ---- Prove superate: un argomento diventa «superato» (verde nella grammatica) con almeno 4 risposte e il 70% di giuste;
   // una serie è superata con il 70% di giuste. Alla fine di una serie superata compare un messaggio di complimenti.
   var PASS_RATIO = 0.7, PASS_MIN = 4;
-  sp.passed = function (p) { return !!p && p.done >= PASS_MIN && p.correct / p.done >= PASS_RATIO; };
+  // Si supera un argomento con almeno PASS_MIN risposte e il 70% di punti pesati: le risposte difficili (B2, C1) contano più di quelle facili.
+  sp.ratioOf = function (p) { return p && p.wdone > 0 ? p.wcorrect / p.wdone : (p && p.done > 0 ? p.correct / p.done : 0); };
+  sp.passed = function (p) { return !!p && p.done >= PASS_MIN && sp.ratioOf(p) >= PASS_RATIO; };
+  sp.WEIGHT = { A2: 1, B1: 2, B2: 3, C1: 4 };
   sp.progressOf = function (topic) { return ((sp.stats && sp.stats.exProgress) || {})[topic]; };
   function grammarTitle(id) {
     var found = '';

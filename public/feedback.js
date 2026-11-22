@@ -58,6 +58,11 @@
     });
   }
 
+  // Segnalazione rapida dall'esercizio (senza aprire la finestra): window.spReport(testo)
+  window.spReport = function (text) {
+    return send({ kind: 'contenuto', text: String(text).slice(0, 1900), page: location.pathname + location.hash, device: (window.innerWidth || 0) + 'x' + (window.innerHeight || 0) });
+  };
+
   var b = el('button', 'fb-btn', '💬 Feedback');
   b.type = 'button'; b.title = 'Segnala un problema o lascia un suggerimento';
   b.addEventListener('click', open);

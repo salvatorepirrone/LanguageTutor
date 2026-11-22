@@ -58,23 +58,70 @@
     root.appendChild(page);
   }
 
+  // Andamento: percentuale di punti pesati (le risposte difficili contano di più) per giorno di esercizi e per test, con la media mobile.
+  function trend(c, s) {
+    var pts = [], byDay = {};
+    (s.series || []).forEach(function (x) {
+      var d = byDay[x.t] = byDay[x.t] || { t: x.t, wn: 0, wc: 0, n: 0 };
+      d.wn += x.wn; d.wc += x.wc; d.n += x.n;
+    });
+    Object.keys(byDay).sort().forEach(function (k) { var d = byDay[k]; if (d.wn > 0) pts.push({ t: k, v: d.wc / d.wn, kind: 'ex', n: d.n }); });
+    (s.tests || []).forEach(function (t) { if (t.wtotal > 0) pts.push({ t: t.t, v: t.wcorrect / t.wtotal, kind: 'test', n: t.total }); });
+    pts.sort(function (a, b) { return a.t < b.t ? -1 : a.t > b.t ? 1 : (a.kind < b.kind ? -1 : 1); });
+    c.appendChild(el('h3', '', 'Andamento'));
+    if (pts.length < 2) {
+      c.appendChild(el('p', 'muted', 'L\'andamento compare dopo qualche giorno di esercizi o dopo un secondo test. Le risposte più difficili (B2, C1) valgono più di quelle facili: il punteggio è pesato.'));
+      return;
+    }
+    var W = 320, H = 120, L = 28, B = 18, T = 8, R = 8;
+    var NS = 'http://www.w3.org/2000/svg';
+    function n(tag, attrs) { var e = document.createElementNS(NS, tag); for (var k in attrs) e.setAttribute(k, attrs[k]); return e; }
+    var svg = n('svg', { viewBox: '0 0 ' + W + ' ' + H, width: '100%', role: 'img', 'aria-label': 'Andamento del punteggio pesato' });
+    svg.style.maxWidth = '520px';
+    var xs = function (i) { return L + (pts.length === 1 ? 0 : i * (W - L - R) / (pts.length - 1)); };
+    var ys = function (v) { return T + (1 - v) * (H - T - B); };
+    [0, 0.5, 0.7, 1].forEach(function (g) {
+      var ln = n('line', { x1: L, x2: W - R, y1: ys(g), y2: ys(g), stroke: 'currentColor', 'stroke-opacity': g === 0.7 ? 0.45 : 0.15, 'stroke-dasharray': g === 0.7 ? '4 3' : '' });
+      svg.appendChild(ln);
+      var tx = n('text', { x: L - 4, y: ys(g) + 3, 'text-anchor': 'end', 'font-size': 9, fill: 'currentColor', 'fill-opacity': 0.6 }); tx.textContent = Math.round(g * 100) + '%'; svg.appendChild(tx);
+    });
+    var avg = pts.map(function (p, i) {
+      var from = Math.max(0, i - 2), sum = 0, k;
+      for (k = from; k <= i; k++) sum += pts[k].v;
+      return sum / (i - from + 1);
+    });
+    svg.appendChild(n('polyline', { points: avg.map(function (v, i) { return xs(i) + ',' + ys(v); }).join(' '), fill: 'none', stroke: 'currentColor', 'stroke-width': 2, 'stroke-opacity': 0.75 }));
+    pts.forEach(function (p, i) {
+      var dot = n(p.kind === 'test' ? 'rect' : 'circle', p.kind === 'test' ? { x: xs(i) - 4, y: ys(p.v) - 4, width: 8, height: 8, fill: '#c0392b' } : { cx: xs(i), cy: ys(p.v), r: 3.5, fill: '#2e8b57' });
+      var tt = n('title', {}); tt.textContent = p.t + ' · ' + (p.kind === 'test' ? 'test' : 'esercizi') + ' · ' + Math.round(p.v * 100) + '% (' + p.n + ' risposte)'; dot.appendChild(tt);
+      svg.appendChild(dot);
+    });
+    var first = n('text', { x: L, y: H - 4, 'font-size': 9, fill: 'currentColor', 'fill-opacity': 0.6 }); first.textContent = pts[0].t; svg.appendChild(first);
+    var last = n('text', { x: W - R, y: H - 4, 'text-anchor': 'end', 'font-size': 9, fill: 'currentColor', 'fill-opacity': 0.6 }); last.textContent = pts[pts.length - 1].t; svg.appendChild(last);
+    c.appendChild(svg);
+    var tot = 0, totW = 0;
+    Object.keys(s.exProgress || {}).forEach(function (k) { var e = s.exProgress[k]; tot += e.wdone !== undefined ? e.wdone : e.done; totW += e.wcorrect !== undefined ? e.wcorrect : e.correct; });
+    c.appendChild(el('p', 'muted', '● esercizi (un punto al giorno) · ■ test · linea = media delle ultime tre misure. Punteggio pesato: A2 vale 1, B1 2, B2 3, C1 4' + (tot ? ' · negli esercizi finora: ' + Math.round(100 * totW / tot) + '%' : '') + '.'));
+  }
+
   function progress(page) {
     var s = SP.stats;
     page.appendChild(el('div', 'sec-title', 'I miei progressi'));
     var c = el('div', 'card');
     c.appendChild(el('div', '', 'Giorni di pratica: ' + s.totalDays + ' · Serie attuale: ' + s.streak + ' · Parole nel mazzo: ' + s.vocabCount));
+    trend(c, s);
     if (s.tests && s.tests.length) {
       c.appendChild(el('h3', '', 'Test svolti'));
       var bars = el('div', 'bars');
       s.tests.forEach(function (t) {
-        var b = el('div'), pct = Math.round(100 * t.correct / t.total);
+        var b = el('div'), pct = Math.round(100 * (t.wtotal > 0 ? t.wcorrect / t.wtotal : t.correct / t.total));
         b.style.height = Math.max(4, Math.round(0.5 * pct)) + 'px'; b.title = t.t + ': ' + pct + '%';
         bars.appendChild(b);
       });
       c.appendChild(bars);
       var ul = el('ul');
       s.tests.slice().reverse().forEach(function (t) {
-        ul.appendChild(el('li', '', t.t + ' — ' + t.correct + '/' + t.total + (t.level ? ' · stima ' + t.level : '') + (t.writing >= 0 ? ' · scritto ' + t.writing + '/10' : '')));
+        ul.appendChild(el('li', '', t.t + ' — ' + t.correct + '/' + t.total + (t.wtotal > 0 ? ' (pesato ' + Math.round(100 * t.wcorrect / t.wtotal) + '%)' : '') + (t.level ? ' · stima ' + t.level : '') + (t.writing >= 0 ? ' · scritto ' + t.writing + '/10' : '')));
       });
       c.appendChild(ul);
     } else {
@@ -255,7 +302,7 @@
     page.appendChild(back);
 
     SP.call({
-      action: 'test_result', correct: correct, total: items.length, sections: secs, level: level,
+      action: 'test_result', correct: correct, total: items.length, wcorrect: wsum, wtotal: wmax, sections: secs, level: level,
       writing: writing ? writing.score : -1, errors: errors
     }).catch(function () {});
   }

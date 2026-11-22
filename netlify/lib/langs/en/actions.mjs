@@ -435,7 +435,14 @@ export async function recordExercise(ctx, inp) {
     addErrors(dd, errs, ctx.now);
     const key = topicId || 'mix';
     const cur = dd.ex[key] || { done: 0, correct: 0 };
-    dd.ex[key] = { done: cur.done + total, correct: cur.correct + correct };
+    // Risposte pesate per difficoltà: ogni esercizio ha un peso (A2=1, B1=2, B2=3, C1=4) e un punteggio da 0 a 1.
+    // Se il browser non manda i pesi, ogni risposta vale 1.
+    const ws = (Array.isArray(inp.weights) ? inp.weights : []).slice(0, 50).filter((x) => x && typeof x === 'object')
+      .map((x) => ({ w: Math.max(1, Math.min(4, parseInt(x.w, 10) || 1)), s: Math.max(0, Math.min(1, parseFloat(x.s) || 0)) }));
+    const wn = ws.length ? ws.reduce((a, x) => a + x.w, 0) : total;
+    const wc = ws.length ? Math.round(ws.reduce((a, x) => a + x.w * x.s, 0) * 100) / 100 : correct;
+    dd.ex[key] = { done: cur.done + total, correct: cur.correct + correct, wdone: (cur.wdone === undefined ? cur.done : cur.wdone) + wn, wcorrect: Math.round(((cur.wcorrect === undefined ? cur.correct : cur.wcorrect) + wc) * 100) / 100 };
+    if (total > 0) { dd.series = (dd.series || []).concat([{ t: today(ctx.now), topic: key, n: total, c: correct, wn, wc }]).slice(-120); }
     return dd;
   });
   return { stats: stats(d, ctx.now) };
@@ -698,6 +705,7 @@ export async function testResult(ctx, inp) {
   const w = parseInt(inp.writing, 10);
   const entry = {
     t: today(ctx.now), correct: Math.max(0, parseInt(inp.correct, 10) || 0), total: Math.max(1, parseInt(inp.total, 10) || 1),
+    wcorrect: Math.max(0, parseFloat(inp.wcorrect) || 0), wtotal: Math.max(0, parseFloat(inp.wtotal) || 0),
     sections, level: str(inp.level, 6), writing: Number.isNaN(w) ? -1 : Math.max(-1, Math.min(10, w)),
   };
   const errs = (Array.isArray(inp.errors) ? inp.errors : []).slice(0, 20).filter((e) => e && e.corr)

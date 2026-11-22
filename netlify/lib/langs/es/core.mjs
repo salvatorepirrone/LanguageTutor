@@ -20,7 +20,7 @@ import { HttpError, today, addDays, daysBetween, pickOne } from '../../util.mjs'
 
 export function defaults(d) {
   d = d && typeof d === 'object' ? d : {};
-  return Object.assign({ days: {}, errors: [], vocab: [], deck: {}, ex: {}, tests: [], profile: null, recent: null }, d);
+  return Object.assign({ days: {}, errors: [], vocab: [], deck: {}, ex: {}, series: [], tests: [], profile: null, recent: null }, d);
 }
 
 export async function loadData(store, user) { return defaults(await store.read('data/' + user, {})); }
@@ -103,6 +103,7 @@ export function stats(d, now = new Date()) {
     deckDue,
     recentVocab: d.vocab.slice(-12),
     exProgress: d.ex,
+    series: (d.series || []).slice(-60),
     tests: d.tests.slice(-10),
     daysLeft: CFG.DEADLINE ? Math.max(0, daysBetween(t, CFG.DEADLINE)) : null,
   };
