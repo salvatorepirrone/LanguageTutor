@@ -150,7 +150,7 @@ Spagnolo 103 prove, portoghese 97, inglese 103, francese 103, inglese e francese
 
 ## Limiti da conoscere
 
-- Le funzioni sincrone di Netlify durano al massimo 60 secondi; le chiamate più lente (test, liste, lezioni) ne usano 15-50 alla prima generazione, poi il risultato resta in cache.
+- Le funzioni sincrone di Netlify durano al massimo **30 secondi** (oltre, errore 502/504). Per questo ogni generazione lunga (esercizi, liste di vocabolario, test, lezioni, schede di letteratura) è divisa in più richieste a Claude in parallelo, ognuna breve; ogni richiesta ha una scadenza di 27 secondi (`ctx.deadline`) e, se non basta, risponde con un messaggio chiaro invece di un errore generico. Il risultato di test, liste e lezioni resta poi in cache.
 - Lezioni, liste di vocabolario ed esercizi sono generati da Claude e non sono riletti da un insegnante.
 - Il microfono richiede Chrome, Edge o Safari e una connessione a internet.
 - Il motore dei verbi inglese coniuga con regole e con circa 160 verbi irregolari; quello francese con le regole dei tre gruppi (con le particolarità ortografiche) e circa 80 irregolari, e mostra il participio dei verbi con «être» come allé(e)(s); un verbo non in elenco viene verificato dal tutor.

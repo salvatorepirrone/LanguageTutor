@@ -155,7 +155,7 @@ export function fakeClaude(counter, opts = {}) {
         { type: 'scelta', q: `Mi hermana ___ médica ${stamp}.`, options: ['es', 'está', 'hay', 'tiene'], answer: 0, why: 'ser' },
       ] };
     } else if (sys.includes('Valuta traduzioni')) payload = { results: JSON.parse(b.messages[0].content).map((x, i) => ({ ok: i === 0, score: i === 1 ? 0.7 : undefined, corrected: x.ref, note: 'nota' })) };
-    else if (sys.includes('scheda di studio')) payload = FAKE_SHEET;
+    else if (sys.includes('scheda di studio')) payload = String(b.messages[0].content).includes('Parte B di 2') ? { summary: '', terms: [], patterns: [], questions: FAKE_SHEET.questions, cloze: FAKE_SHEET.cloze } : { ...FAKE_SHEET, questions: [], cloze: [] };
     else if (sys.includes('forme coniugate del verbo')) {
       payload = { results: JSON.parse(b.messages[0].content).map((x) => ({ i: x.i, forms: fakeItalian(x.it, x.tenseIt, x.persons) })) };
     }
@@ -170,7 +170,8 @@ export function fakeClaude(counter, opts = {}) {
     else if (/lista di (vocabolario|terminologia)/.test(sys)) payload = { words: Array.from({ length: 24 }, (_, i) => ({ es: 'la palabra' + i, it: 'parola ' + i, syn: ['el vocablo' + i], ex: 'Ejemplo ' + i, exit: 'Esempio ' + i, type: 'nome' })) };
     else if (sys.includes('test di livello')) {
       const secs = ['tempi', 'forme', 'lessico', 'comprensione'];
-      payload = { items: Array.from({ length: 20 }, (_, i) => ({ type: 'scelta', section: secs[Math.floor(i / 5)], level: ['A2', 'B1', 'B2'][i % 3], q: `Domanda test numero ${i} ${counter.n}`, text: i >= 15 ? 'Testo breve.' : undefined, options: ['a', 'b', 'c', 'd'], answer: i % 4, why: 'perché' })) };
+      const want = (String(b.messages[0].content).match(/sezione (\w+)/) || [])[1];
+      payload = { items: Array.from({ length: want ? 5 : 20 }, (_, i) => ({ type: 'scelta', section: want || secs[Math.floor(i / 5)], level: ['A2', 'B1', 'B2'][i % 3], q: `Domanda test numero ${i} ${counter.n}`, text: (want ? want === 'comprensione' : i >= 15) ? 'Testo breve.' : undefined, options: ['a', 'b', 'c', 'd'], answer: i % 4, why: 'perché' })) };
     } else if (sys.includes('Valuta un breve testo')) payload = { level: 'B1', score: 7.4, comment: 'Bene.', corrections: [{ original: 'he comido', corrected: 'comí', note: 'ayer', cat: 'tempi del passato' }], improved: 'Texto mejorado.' };
     else payload = { reply: 'boh' };
     return new Response(JSON.stringify({ content: [{ type: 'text', text: JSON.stringify(payload) }] }), { status: 200, headers: { 'content-type': 'application/json' } });
@@ -332,7 +333,7 @@ export async function run({ iterations = 1000 } = {}) {
   r = await call('POST', API, { cookie: S, body: { action: 'grammar', topic: 'anamnesi-domande' } });
   ok(r.status === 200 && r.json.lesson.blocks[0].table.headers.length === 2, 'lezione generata');
   r = await call('POST', API, { cookie: S, body: { action: 'grammar', topic: 'anamnesi-domande' } });
-  ok(counter.n === before + 1, 'lezione in cache: una sola chiamata a Claude');
+  ok(counter.n === before + 3, 'lezione in cache: tre chiamate a Claude in parallelo, poi più nessuna');
   r = await call('POST', API, { cookie: S, body: { action: 'grammar', topic: 'inesistente' } });
   ok(r.status === 400, 'argomento sconosciuto: 400');
 
@@ -402,9 +403,9 @@ export async function run({ iterations = 1000 } = {}) {
   ok(r.status === 400, 'letteratura: ricerca troppo corta rifiutata');
   const nl = counter.n;
   r = await call('POST', API, { cookie: S, body: { action: 'lit_read', pmid: '111' } });
-  ok(r.status === 200 && r.json.article.title.startsWith('Sacubitril') && r.json.article.doi === '10.1000/xyz' && r.json.sheet.terms.length === 8 && r.json.sheet.questions.length === 4 && r.json.sheet.cloze.length === 3 && counter.n === nl + 1 && counter.last.system.includes('scheda di studio') && counter.last.messages[0].content.includes('hazard ratio'), 'letteratura: scheda di studio dall\'abstract', JSON.stringify(r.json).slice(0, 200));
+  ok(r.status === 200 && r.json.article.title.startsWith('Sacubitril') && r.json.article.doi === '10.1000/xyz' && r.json.sheet.terms.length === 8 && r.json.sheet.questions.length === 4 && r.json.sheet.cloze.length === 3 && counter.n === nl + 2 && counter.last.system.includes('scheda di studio') && counter.last.messages[0].content.includes('hazard ratio'), 'letteratura: scheda di studio dall\'abstract', JSON.stringify(r.json).slice(0, 200));
   r = await call('POST', API, { cookie: S, body: { action: 'lit_read', pmid: '111' } });
-  ok(r.status === 200 && counter.n === nl + 1, 'letteratura: la scheda resta in cache (nessuna nuova chiamata a Claude)');
+  ok(r.status === 200 && counter.n === nl + 2, 'letteratura: la scheda resta in cache (nessuna nuova chiamata a Claude)');
   r = await call('POST', API, { cookie: S, body: { action: 'lit_read', pmid: 'abc' } });
   ok(r.status === 400, 'letteratura: identificativo non valido rifiutato');
   r = await call('POST', API, { cookie: S, body: { action: 'lit_deck_add', pmid: '111' } });

@@ -84,7 +84,7 @@ async function route(req, deps) {
   // deps.cookie serve solo alle prove (nel browser l'intestazione Cookie di una Request costruita a mano viene scartata).
   const sess = await auth.sessionUser(deps.cookie !== undefined ? deps.cookie : req.headers.get('cookie'), secret, store);
   if (!sess) throw new HttpError(401, 'Sessione scaduta: accedi di nuovo.');
-  const base = { root: store, user: sess.name, userRec: sess.user, env, now: new Date(), fetch: deps.fetch };
+  const base = { root: store, user: sess.name, userRec: sess.user, env, now: new Date(), fetch: deps.fetch, deadline: Date.now() + (deps.budgetMs || 27000) };   // Netlify interrompe le funzioni dopo 30 secondi
 
   if (path === '/api/auth/me' && method === 'GET') {
     return out({ user: sess.name, role: sess.user.role || 'user', limit: auth.limitOf(sess.user), used: await auth.usageToday(store, sess.name) });

@@ -191,7 +191,7 @@ var SPV = (function () {
   derive('de', 'venir', 'diventare'); derive('re', 'venir', 'tornare'); derive('par', 'venir', 'riuscire, pervenire'); derive('pré', 'venir', 'prevenire', { aux: 'avoir' }, 0);
   derive('ob', 'tenir', 'ottenere'); derive('re', 'tenir', 'trattenere'); derive('con', 'tenir', 'contenere'); derive('main', 'tenir', 'mantenere'); derive('appar', 'tenir', 'appartenere');
   derive('re', 'voir', 'rivedere', { f: 'reverr' }); derive('pré', 'voir', 'prevedere', { f: 'prévoir' });
-  derive('re', 'faire', 'rifare'); derive('dé', 'faire', 'disfare'); derive('re', 'lire', 'rileggere'); derive('dé', 'écrire', 'descrivere', {}, 1); derive('sou', 'rire', 'sorridere');
+  derive('re', 'faire', 'rifare'); derive('dé', 'faire', 'disfare'); derive('re', 'lire', 'rileggere'); derive('dé', 'écrire', 'descrivere', {}, 1); derive('pres', 'écrire', 'prescrivere', {}, 1); derive('ins', 'écrire', 'iscrivere', {}, 1); derive('sou', 'rire', 'sorridere');
   derive('re', 'connaître', 'riconoscere'); derive('ap', 'paraître', 'apparire', {}, 0); derive('dis', 'paraître', 'scomparire', {}, 0); derive('dé', 'couvrir', 'scoprire', {}, 0);
   derive('re', 'dire', 'ridire'); derive('pré', 'dire', 'predire', { p: ['prédis', 'prédis', 'prédit', 'prédisons', 'prédisez', 'prédisent'], imper: ['prédis', 'prédisons', 'prédisez'] });
   derive('sou', 'tenir', 'sostenere', {}, 0);

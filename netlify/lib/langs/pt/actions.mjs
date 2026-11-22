@@ -17,9 +17,15 @@ export function jsonFrom(text) {
 
 // Una chiamata a Claude; restituisce il testo. Ogni chiamata conta nel limite giornaliero della persona.
 export async function callClaude(ctx, system, messages, maxTokens = 900, timeoutSec = 90) {
-  if (!(await quotaHit(ctx.root, ctx.user, ctx.userRec))) {
+  // Il limite giornaliero conta le richieste dell'utente, non le singole chiamate a Claude (una richiesta può farne diverse in parallelo).
+  if (!ctx.quotaP) ctx.quotaP = quotaHit(ctx.root, ctx.user, ctx.userRec);
+  if (!(await ctx.quotaP)) {
     throw new HttpError(429, `Hai raggiunto il limite giornaliero di richieste al tutor (${limitOf(ctx.userRec)}). Riprova domani.`);
   }
+  // Una funzione Netlify non può durare più di 30 secondi: si lascia un margine per rispondere con un messaggio chiaro invece di un errore generico.
+  const left = ctx.deadline ? ctx.deadline - Date.now() : Infinity;
+  if (left < 3000) throw new HttpError(504, 'Il tutor non ha fatto in tempo a rispondere (il sito concede 30 secondi a ogni richiesta): riprova.');
+  const waitMs = Math.min(timeoutSec * 1000, left - 500);
   const key = ctx.env.ANTHROPIC_API_KEY;
   if (!key) throw new HttpError(500, 'La chiave API di Claude non è configurata sul server.');
   let res;
@@ -29,9 +35,10 @@ export async function callClaude(ctx, system, messages, maxTokens = 900, timeout
       headers: { 'content-type': 'application/json', 'x-api-key': key, 'anthropic-version': '2023-06-01' },
       // Il modello ragiona per default e il ragionamento consuma max_tokens (JSON troncato, risposte lente): 'between_tools' lo spegne.
       body: JSON.stringify({ model: CFG.MODEL, max_tokens: maxTokens, thinking: { type: 'between_tools' }, system, messages }),
-      signal: AbortSignal.timeout(timeoutSec * 1000),
+      signal: AbortSignal.timeout(waitMs),
     });
   } catch (e) {
+    if (e && (e.name === 'TimeoutError' || e.name === 'AbortError')) throw new HttpError(504, 'Il tutor ha impiegato troppo tempo a rispondere (il sito concede 30 secondi a ogni richiesta): riprova.');
     throw new HttpError(502, 'Servizio non raggiungibile: ' + (e && e.message ? e.message : e));
   }
   const body = await res.json().catch(() => ({}));
@@ -42,9 +49,18 @@ export async function callClaude(ctx, system, messages, maxTokens = 900, timeout
   return (body.content || []).filter((p) => p.type === 'text').map((p) => p.text).join('');
 }
 
+// Più richieste a Claude in parallelo: una richiesta fallita non fa fallire le altre (si usa ciò che è arrivato); se falliscono tutte, si rilancia il primo errore.
+async function claudeAll(calls) {
+  const res = await Promise.allSettled(calls);
+  const ok = res.filter((r) => r.status === 'fulfilled').map((r) => r.value);
+  if (!ok.length) throw res[0].reason;
+  return res.map((r) => (r.status === 'fulfilled' ? r.value : null));
+}
+
 // Come sopra ma pretende un oggetto JSON; ritenta una volta se la risposta non è utilizzabile.
 export async function claudeJson(ctx, system, userText, maxTokens, timeoutSec = 120) {
   for (let i = 0; i < 2; i++) {
+    if (i === 1 && ctx.deadline && ctx.deadline - Date.now() < 12000) break;   // non c'è più tempo per riprovare
     const j = jsonFrom(await callClaude(ctx, system, [{ role: 'user', content: userText }], maxTokens, timeoutSec));
     if (j) return j;
   }
@@ -249,7 +265,16 @@ export async function lesson(ctx, inp) {
     const system = CFG.BASE_RULES + '\nScrivi una breve lezione di grammatica, chiara e concreta, per uno studente italiano. Forma:\n'
       + '{"summary":"1-2 frasi: cos\'è e a cosa serve","blocks":[{"heading":"titolo breve","text":"spiegazione in italiano, concisa","table":{"headers":["..."],"rows":[["..."]]} oppure null,"examples":[{"es":"frase portoghese","it":"traduzione italiana"}]}],"mistakes":[{"wrong":"errore tipico di un italiano","right":"forma corretta","why":"perché"}],"tips":["trucco per ricordare"]}'
       + '\nRegole: da 3 a 5 blocchi; le tabelle solo dove aiutano (coniugazioni, paradigmi) e con celle brevi; 2-4 esempi per blocco, naturali e di livello ' + (topic.sectionId === 'avanzato' ? 'B2-C1' : 'A2-B1') + '; evidenzia le differenze rispetto all\'italiano e i falsi amici; 3-5 errori tipici; niente markdown.';
-    const j = await claudeJson(ctx, system, `Argomento: ${topic.section} — ${topic.title}`, 3500, 120);
+    // Tre richieste in parallelo (introduzione e regole / usi ed eccezioni / errori tipici e trucchi): una lezione intera non starebbe nei 30 secondi del sito.
+    const base = `Argomento: ${topic.section} — ${topic.title}`;
+    const parts = [
+      '\nParte A di 3: compila "summary" e ESATTAMENTE 2 blocchi (regola di base e forme, poi gli usi principali); "mistakes" e "tips" array vuoti. Ignora il numero di blocchi indicato sopra.',
+      '\nParte B di 3: "summary" stringa vuota e ESATTAMENTE 2 blocchi (eccezioni e casi particolari, poi confronto con l\'italiano e falsi amici); "mistakes" e "tips" array vuoti. Ignora il numero di blocchi indicato sopra.',
+      '\nParte C di 3: "summary" stringa vuota, "blocks" array vuoto; compila solo "mistakes" (3-4 errori tipici di un italiano) e "tips" (2-3 trucchi per ricordare).',
+    ];
+    const gotL = (await claudeAll(parts.map((p) => claudeJson(ctx, system, base + p, 1600, 24)))).filter(Boolean);
+    const j = { summary: (gotL.find((x) => x.summary) || {}).summary || '', blocks: gotL.flatMap((x) => (Array.isArray(x.blocks) ? x.blocks : [])),
+      mistakes: gotL.flatMap((x) => (Array.isArray(x.mistakes) ? x.mistakes : [])), tips: gotL.flatMap((x) => (Array.isArray(x.tips) ? x.tips : [])) };
     les = cleanLesson(j, topic);
     if (!les.blocks.length) throw new HttpError(502, 'Lezione non utilizzabile, riprova.');
     await ctx.store.write(key, les);
@@ -265,6 +290,7 @@ const HINT_WORDS = new Set(['yo', 'tú', 'tu', 'él', 'el', 'ella', 'usted', 'no
   'eu', 'você', 'voce', 'ele', 'nós', 'nos', 'vocês', 'voces', 'eles', 'elas', 'a gente', 'singular', 'plural', 'masculino', 'femenino', 'feminino', 'masculina', 'femenina', 'feminina']);
 export function suspiciousHint(q) {
   for (const m of String(q).matchAll(/\(([^)]*)\)/g)) {
+    if (/^[A-Z][A-Z0-9-]{1,7}s?$/.test(m[1].trim())) continue;   // sigle (ECG, BNP, FEVG): non sono glosse
     const parts = m[1].toLowerCase().split(/[,;/]/).map((x) => x.trim()).filter(Boolean);
     for (const p of parts) {
       if (HINT_WORDS.has(p) || /\s/.test(p) || /(ar|er|ir|ír|ôr|or)(-?se)?$/.test(p)) continue;
@@ -272,6 +298,28 @@ export function suspiciousHint(q) {
     }
   }
   return false;
+}
+
+// Chiave di confronto senza accenti, maiuscole e spazi in più (due opzioni con la stessa chiave sono un trabocchetto, non un distrattore).
+const plainKey = (s) => String(s).normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^\p{L}\p{N}]+/gu, ' ').trim();
+
+// Controllo di qualità degli esercizi: un secondo sguardo (breve) di Claude scarta quelli con risposta sbagliata, più risposte giuste,
+// spiegazione incoerente o soggetto che cambia nella frase. Se il controllo non riesce, si tengono gli esercizi così come sono.
+async function reviewItems(ctx, items) {
+  if (items.length < 3 || (ctx.deadline && ctx.deadline - Date.now() < 9000)) return items;
+  const shown = items.map((it, i) => ({ i, type: it.type, q: it.q,
+    ...(it.type === 'scelta' ? { options: it.options, right: it.options[it.answer] } : it.type === 'completa' ? { answer: it.answer, alts: it.alts } : { ref: it.ref }), why: it.why }));
+  const system = CFG.BASE_RULES + '\nSei un revisore di esercizi per studenti. Per ogni esercizio controlla con attenzione: '
+    + '1) inserendo la risposta indicata la frase è grammaticale e naturale (soggetto, accordi, preposizioni e parole che seguono lo spazio, per esempio una preposizione che non ammette quella risposta); '
+    + '2) tra le opzioni (o tra le risposte possibili) ce n\'è UNA SOLA giusta nel contesto: se un\'altra opzione è altrettanto accettabile, o se il soggetto non è chiaro e due forme vanno bene, l\'esercizio è da scartare; '
+    + '3) la spiegazione "why" è coerente con la risposta indicata (non la contraddice); 4) la frase non mescola soggetti diversi senza motivo; 5) per "traduci", "ref" è una traduzione corretta e naturale della frase italiana. '
+    + 'Rispondi SOLO con {"bad":[indici degli esercizi da scartare]}, array vuoto se vanno bene tutti.';
+  try {
+    const j = await claudeJson(ctx, system, JSON.stringify(shown), 400, 12);
+    const bad = new Set((Array.isArray(j.bad) ? j.bad : []).map(Number));
+    const kept = items.filter((it, i) => !bad.has(i));
+    return kept.length >= 3 ? kept : items;
+  } catch (e) { return items; }
 }
 
 export function cleanItems(items, types, max, strictHints = false) {
@@ -288,6 +336,7 @@ export function cleanItems(items, types, max, strictHints = false) {
       const opts = (Array.isArray(it.options) ? it.options : []).map((o) => str(o, 120)).filter(Boolean);
       const ans = it.answer;
       if (opts.length < 2 || !Number.isInteger(ans) || ans < 0 || ans >= Math.min(4, opts.length)) continue;
+      if (new Set(opts.slice(0, 4).map(plainKey)).size < Math.min(4, opts.length)) continue;   // due opzioni uguali a meno di accenti o maiuscole
       const four = opts.slice(0, 4);
       const right = four[ans];
       const sh = shuffle(four);   // il modello tende a mettere la risposta giusta nelle prime posizioni
@@ -331,32 +380,27 @@ export async function exercises(ctx, inp) {
   }
   const typeText = { misti: 'un mix equilibrato dei tre tipi', scelta: 'solo tipo "scelta"', completa: 'solo tipo "completa"', traduci: 'solo tipo "traduci"' }[kind];
   const system = CFG.BASE_RULES + `\nCrea esercizi per uno studente italiano, ${levelText(prof.level)}. Forma:\n`
-    + '{"items":[{"type":"scelta","q":"frase con ___ al posto del vuoto","options":["a","b","c","d"],"answer":0,"why":"spiegazione breve in italiano"},'
-    + '{"type":"completa","q":"frase con ___ e, tra parentesi, il verbo o la parola base da coniugare/adattare","answer":"forma corretta (se la frase ha più spazi ___: le risposte in ordine, separate da ' / ')","alts":["altre forme accettabili"],"why":"..."},'
-    + '{"type":"traduci","q":"frase da tradurre in portoghese, in italiano","ref":"traduzione portoghese (brasiliana) di riferimento","why":"punto di grammatica in gioco"}]}'
-    + '\nRegole: "answer" nei tipi scelta è l\'indice (0-3) della risposta corretta: variane la posizione; una sola risposta giusta per gli esercizi di scelta e distrattori plausibili; frasi realistiche e brevi, tutte diverse tra loro; niente doppie soluzioni nei completamenti (se ce ne sono, mettile in alts); \'why\' spiega la regola in una frase. Le frasi di scelta e completa sono interamente in portoghese brasiliano: mai parole italiane né glosse tra parentesi (tra parentesi solo l\'infinito del verbo da coniugare o il pronome); \'why\' spiega la regola in italiano e non commenta né corregge mai la frase dell\'esercizio: se ti accorgi di un errore nella frase, riscrivi l\'esercizio.';
+    + '{"items":[{"type":"scelta","level":"A2|B1|B2|C1","q":"frase con ___ al posto del vuoto","options":["a","b","c","d"],"answer":0,"why":"spiegazione breve in italiano"},'
+    + '{"type":"completa","level":"A2|B1|B2|C1","q":"frase con ___ e, tra parentesi, il verbo o la parola base da coniugare/adattare","answer":"forma corretta (se la frase ha più spazi ___: le risposte in ordine, separate da ' / ')","alts":["altre forme accettabili"],"why":"..."},'
+    + '{"type":"traduci","level":"A2|B1|B2|C1","q":"frase da tradurre in portoghese, in italiano","ref":"traduzione portoghese (brasiliana) di riferimento","why":"punto di grammatica in gioco"}]}'
+    + '\nRegole: "answer" nei tipi scelta è l\'indice (0-3) della risposta corretta: variane la posizione; una sola risposta giusta per gli esercizi di scelta e distrattori plausibili; frasi realistiche e brevi, tutte diverse tra loro; niente doppie soluzioni nei completamenti (se ce ne sono, mettile in alts); \'why\' spiega la regola in una frase; "level" è il livello di difficoltà dell\'esercizio (A2, B1, B2 o C1): varialo, con la maggior parte degli esercizi al livello dello studente e qualcuno più facile e qualcuno più difficile; scrivi "why" dopo aver scelto la risposta e controlla che non la contraddica. Le frasi di scelta e completa sono interamente in portoghese brasiliano: mai parole italiane né glosse tra parentesi (tra parentesi solo l\'infinito del verbo da coniugare o il pronome); \'why\' spiega la regola in italiano e non commenta né corregge mai la frase dell\'esercizio: se ti accorgi di un errore nella frase, riscrivi l\'esercizio.';
   // Varietà: contesti e persone a caso, e le frasi già proposte da non ripetere.
   const recent = recentOf(d).items;
   const avoid = recent.slice(-40);
   const seed = '\nContesti da usare, uno per esercizio e variandoli (non limitarti a questi): ' + pickN(DATA.contexts, 5).join('; ') + '.'
     + '\nAlterna i soggetti (' + pickN(['eu', 'você', 'ele/ela', 'nós', 'vocês', 'eles/elas'], 4).join(', ') + ') e i verbi, evita le frasi sul cinema e sugli amici se non strettamente utili.'
     + (avoid.length ? '\nFrasi già proposte di recente: NON ripeterle né riformularle:\n- ' + avoid.join('\n- ') : '');
-  // Alcuni esercizi vengono scartati (glosse nella frase, frasi già viste, formati sbagliati): se ne chiedono di più e, se ne mancano
-  // ancora, un secondo giro li integra. Il secondo giro parte solo se il primo è stato abbastanza rapido da stare nel limite di tempo.
+  // Una sola richiesta lunga non sta nei 30 secondi del sito: se ne fanno due più brevi in parallelo (con qualche esercizio in più, perché alcuni
+  // vengono scartati: glosse nella frase, frasi già viste, formati sbagliati) e un controllo finale degli esercizi.
   const types = kind === 'misti' ? ['scelta', 'completa', 'traduci'] : [kind];
-  const extra = n + Math.max(3, Math.ceil(n / 2));
-  const t0 = Date.now();
-  const j = await claudeJson(ctx, system, `Crea ${extra} esercizi: ${typeText}.\nArgomento: ${what}` + seed, 5000, 100);
-  let items = dropRepeats(cleanItems(Array.isArray(j.items) ? j.items : [], types, extra, true), recent).slice(0, n);
-  if (items.length < n && Date.now() - t0 < 25000) {
-    const missing = n - items.length;
-    try {
-      const j2 = await claudeJson(ctx, system, `Crea ${missing + 3} esercizi: ${typeText}.\nArgomento: ${what}` + seed
-        + '\nQueste frasi le ho già: NON ripeterle né riformularle:\n- ' + items.map((i) => i.q).join('\n- '), 4000, 30);
-      const more = dropRepeats(cleanItems(Array.isArray(j2.items) ? j2.items : [], types, missing + 3, true), recent.concat(items.map((i) => normStem(i.q))));
-      items = items.concat(more).slice(0, n);
-    } catch (e) { /* il primo giro basta: meno esercizi è meglio di nessuno */ }
-  }
+  const extra = n + Math.max(2, Math.ceil(n / 3));
+  const half = Math.ceil(extra / 2), asks = [half, extra - half].filter((k) => k > 0);
+  const got = await claudeAll(asks.map((k, idx) => claudeJson(ctx, system,
+    `Crea ${k} esercizi: ${typeText}.\nArgomento: ${what}` + seed
+    + (asks.length > 1 ? `\nQuesta è la parte ${idx + 1} di ${asks.length} della stessa serie: usa ${idx ? 'i contesti, i soggetti e i verbi che resterebbero alla prima parte come ultimi' : 'i primi contesti, soggetti e verbi che ti vengono in mente'}, in modo che le due parti non si assomiglino.` : ''), 2000, 24)));
+  let items = dropRepeats(cleanItems(got.filter(Boolean).flatMap((j) => (Array.isArray(j.items) ? j.items : [])), types, extra * 2, true), recent);
+  items = await reviewItems(ctx, items);
+  items = items.slice(0, n);
   if (items.length < 3) throw new HttpError(502, 'Esercizi non utilizzabili, riprova.');
   await updateData(ctx.store, ctx.user, (dd) => remember(dd, [], items.map((i) => i.q)));
   return { items, topic: topicId, label };
@@ -414,7 +458,11 @@ async function themeWords(ctx, themeId, refresh = false, high = false) {
   const system = CFG.BASE_RULES + '\nCrea una lista di vocabolario per uno studente italiano di livello ' + (high ? 'B2-C1' : 'A2-B1') + '. Forma: '
     + '{"words":[{"es":"parola o espressione portoghese del Brasile (per i nomi con articolo: o/a)","it":"traduzione italiana","syn":["sinonimo portoghese","altro sinonimo"],"ex":"frase di esempio in portoghese brasiliano, breve e naturale","exit":"traduzione italiana della frase","type":"nome|verbo|aggettivo|avverbio|espressione"}]}'
     + '\nRegole: 24 voci, utili e frequenti, non banali per il livello (evita parole identiche all\'italiano); varietà di categorie grammaticali; verbi all\'infinito; lessico del Brasile (non del Portogallo); una sola traduzione principale; "syn": da 0 a 3 sinonimi portoghesi (stesso significato e stessa categoria grammaticale, con l\'articolo per i nomi), array vuoto se non ce ne sono.';
-  const j = await claudeJson(ctx, system, `Tema: ${theme.title} (${theme.hint})` + (high ? '\nLivello alto: scegli parole meno comuni e di registro più alto, collocazioni, espressioni idiomatiche e sfumature; evita il lessico di base.' : ''), 4000, 120);
+  // Due richieste in parallelo (12 voci ciascuna: le più frequenti e poi le meno comuni): una da 24 voci non starebbe nei 30 secondi del sito.
+  const askWords = (part) => claudeJson(ctx, system.replace('Regole: 24 voci', 'Regole: 12 voci'), `Tema: ${theme.title} (${theme.hint})` + (high ? '\nLivello alto: scegli parole meno comuni e di registro più alto, collocazioni, espressioni idiomatiche e sfumature; evita il lessico di base.' : '') + part, 2200, 24);
+  const gotW = await claudeAll([askWords('\nParte 1 di 2: le 12 voci più frequenti e utili del tema.'), askWords('\nParte 2 di 2: altre 12 voci, meno frequenti ma importanti, diverse dalle più comuni.')]);
+  const seen = new Set();
+  const j = { words: gotW.filter(Boolean).flatMap((x) => (Array.isArray(x.words) ? x.words : [])).filter((w) => w && w.es && !seen.has(String(w.es).toLowerCase()) && seen.add(String(w.es).toLowerCase())) };
   const words = (Array.isArray(j.words) ? j.words : []).filter((w) => w && w.es && w.it).slice(0, 30)
     .map((w) => ({ es: str(w.es, 80), it: str(w.it, 100), syn: (Array.isArray(w.syn) ? w.syn : []).map((x) => str(x, 80)).filter(Boolean).slice(0, 4), ex: str(w.ex, 250), exit: str(w.exit, 250), type: str(w.type, 30) }));
   if (words.length < 8) throw new HttpError(502, 'Lista non utilizzabile, riprova.');
@@ -602,8 +650,19 @@ export async function test(ctx) {
   const recent = recentOf(d).items;
   const seed = '\nContesti per le frasi, variandoli: ' + pickN(DATA.contexts, 6).join('; ') + '.'
     + (recent.length ? '\nDomande già viste di recente, da non ripetere: ' + recent.slice(-25).join(' | ') : '');
-  const j = await claudeJson(ctx, system, 'Crea il test.' + seed, 6000, 150);
-  let items = cleanItems(Array.isArray(j.items) ? j.items : [], ['scelta'], 24);
+  // Una richiesta per sezione, in parallelo (venti domande in una volta sola non starebbero nei 30 secondi del sito).
+  const SECTIONS = ['tempi', 'forme', 'lessico', 'comprensione'];
+  const sysFor = (sec) => system
+    .replace(/esattamente 20 domande a scelta multipla, 5 per sezione:/, `esattamente 5 domande a scelta multipla, TUTTE della sezione "${sec}" (qui sotto la descrizione di tutte le sezioni):`)
+    .replace(/Livelli: circa [^;]*;/, 'Livelli: per queste 5 domande copri la gamma dal più facile al più difficile (circa una domanda per livello, due per i livelli centrali);');
+  const gotT = await claudeAll(SECTIONS.map((sec) => claudeJson(ctx, sysFor(sec), 'Crea le 5 domande della sezione ' + sec + '.' + seed, 1800, 24)));
+  let items = [];
+  gotT.forEach((j, k) => {
+    if (!j) return;
+    const sec = SECTIONS[k], its = cleanItems(Array.isArray(j.items) ? j.items : [], ['scelta'], 12);
+    const own = its.filter((x) => x.section === sec);
+    items = items.concat((own.length ? own : its).slice(0, 5).map((x) => ({ ...x, section: sec })));
+  });
   items = dropRepeats(items, recent);
   if (items.length < 12) throw new HttpError(502, 'Test non utilizzabile, riprova.');
   await updateData(ctx.store, ctx.user, (dd) => remember(dd, [], items.map((i) => i.q)));

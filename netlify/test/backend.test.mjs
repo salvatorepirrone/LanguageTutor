@@ -295,7 +295,8 @@ export function fakeClaude(counter, opts = {}) {
     else if (/lista di (vocabolario|terminologia)/.test(sys)) payload = { words: Array.from({ length: 24 }, (_, i) => ({ es: 'la palabra' + i, it: 'parola ' + i, syn: ['el vocablo' + i], ex: 'Ejemplo ' + i, exit: 'Esempio ' + i, type: 'nome' })) };
     else if (sys.includes('test di livello')) {
       const secs = ['tempi', 'forme', 'lessico', 'comprensione'];
-      payload = { items: Array.from({ length: 20 }, (_, i) => ({ type: 'scelta', section: secs[Math.floor(i / 5)], level: ['A2', 'B1', 'B2'][i % 3], q: `Domanda test numero ${i} ${counter.n}`, text: i >= 15 ? 'Testo breve.' : undefined, options: ['a', 'b', 'c', 'd'], answer: i % 4, why: 'perché' })) };
+      const want = (String(b.messages[0].content).match(/sezione (\w+)/) || [])[1];
+      payload = { items: Array.from({ length: want ? 5 : 20 }, (_, i) => ({ type: 'scelta', section: want || secs[Math.floor(i / 5)], level: ['A2', 'B1', 'B2'][i % 3], q: `Domanda test numero ${i} ${counter.n}`, text: (want ? want === 'comprensione' : i >= 15) ? 'Testo breve.' : undefined, options: ['a', 'b', 'c', 'd'], answer: i % 4, why: 'perché' })) };
     } else if (sys.includes('Valuta un breve testo')) payload = { level: 'B1', score: 7.4, comment: 'Bene.', corrections: [{ original: 'he comido', corrected: 'comí', note: 'ayer', cat: 'tempi del passato' }], improved: 'Texto mejorado.' };
     else payload = { reply: 'boh' };
     if (opts.localized) payload = localize(payload, sys, b.messages[0] ? b.messages[0].content : '');
@@ -458,7 +459,7 @@ export async function run({ iterations = 1000, blobs: givenBlobs } = {}) {
   r = await call('POST', API, { cookie: S, body: { action: 'grammar', topic: 'pron-diretti' } });
   ok(r.status === 200 && r.json.lesson.blocks[0].table.headers.length === 2, 'lezione generata');
   r = await call('POST', API, { cookie: S, body: { action: 'grammar', topic: 'pron-diretti' } });
-  ok(counter.n === before + 1, 'lezione in cache: una sola chiamata a Claude');
+  ok(counter.n === before + 3, 'lezione in cache: tre chiamate a Claude in parallelo, poi più nessuna');
   r = await call('POST', API, { cookie: S, body: { action: 'grammar', topic: 'inesistente' } });
   ok(r.status === 400, 'argomento sconosciuto: 400');
 
